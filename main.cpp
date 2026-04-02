@@ -3,6 +3,7 @@
  *  @author Sjoerd de Jonge
  *  2026-03-28
  *
+ *  Functions:
  *  Reads .aiff music files in target folder
  *  Extracts metadata
  *  Structures metadata for the entire target folder
