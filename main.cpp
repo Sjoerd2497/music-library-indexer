@@ -9,11 +9,13 @@
  */
 
 
-// Audio IFF uses big-endian order, meaning the most significant byte is stored at the smallest memory address
-
 #include <iostream>
 
 int main() {
+    int n = 496;
+    std::cout << std::dec << n << std::endl;
+    std::cout << std::oct << n << std::endl;
+    std::cout << std::hex << n << std::endl;
     std::cout << "Hello, World!" << std::endl;
     return 0;
 }
