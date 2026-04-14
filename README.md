@@ -33,6 +33,10 @@ Header-only helper functions.
 `util/base64.h`  
 Header-only Base64 encoder.  
 
+`util/json.hpp`  
+Header-only json library by github.com/nlohmann
+under MIT License.
+
 ## 3. Milestones  
 [x] Read FORM chunk  
 [x] Read all chunk headers (ID + size)  

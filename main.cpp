@@ -29,6 +29,9 @@ int main() {
     std::vector<uint8_t> encode_decode = base64Decode(base64Encode(test_data));
     std::string encode_decode_string{encode_decode.begin(), encode_decode.end()};
     std::cout << encode_decode_string << std::endl;
+    std::vector<uint8_t> testdecode = base64Decode("RG8geW91IGhhdmUgdG8gZGVhbCB3aXRoIEJhc2U2NCBmb3JtYXQ/IEkgZG8gbm90IQ==");
+    std::string testing{testdecode.begin(), testdecode.end()};
+    std::cout << testing << std::endl;
 
     return 0;
 }

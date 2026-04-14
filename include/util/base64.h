@@ -88,17 +88,16 @@ inline std::string base64Encode(std::vector<uint8_t> const& data, const bool url
 
 // Find the first index of a character in an array.
 template <size_t N>
-int indexOfChar(char c, std::array<char, N> arr) {
+int indexOfChar(const char c, std::array<char, N>& arr) {
     return strchr(arr.data(), c)-arr.data();
 }
 
 // Decode a Base64 string to a vector of bytes. For Base64URL alphabet set bool url to true.
 inline std::vector<uint8_t> base64Decode(std::string const& data, const bool url = false) {
     std::vector<uint8_t> result;
-    const std::array<char, 64>& alphabet = url ? base64URL : base64;
+    std::array<char, 64> &alphabet = url ? base64URL : base64;
     const char& pad = padding;
-    int i;
-    for (i = 0; i + 4 <= data.size(); i += 4) {
+    for (int i = 0; i + 4 <= data.size(); i += 4) {
         const uint8_t a = indexOfChar(data[i], alphabet);
         const uint8_t b = indexOfChar(data[i+1], alphabet);
         const uint8_t c = indexOfChar(data[i+2], alphabet);
@@ -111,10 +110,9 @@ inline std::vector<uint8_t> base64Decode(std::string const& data, const bool url
         uint8_t byte1 = (b & 0b00001111) << 4 | (c & 0b00111100) >> 2;
         uint8_t byte2 = (c & 0b00000011) << 6 | (d & 0b00111111);
 
-
         result.push_back(byte0);
-        if (data[i+2] != pad) result.push_back(byte1); // Only include if not padding
-        if (data[i+3] != pad) result.push_back(byte2); // Only include if not padding
+        if (data[i+2] != pad) result.push_back(byte1); // Only include if it is not padding
+        if (data[i+3] != pad) result.push_back(byte2); // Only include if it is not padding
     }
 
     return result;
