@@ -34,7 +34,7 @@ struct id3FrameHeader {
 };
 #pragma pack(pop)
 
-id3Header parseId3Header(std::ifstream& fin);
-void scanId3Frames(std::ifstream& fin, uint32_t tag_size);
+id3Header parseId3Header(std::ifstream& fin, bool verbose = false);
+void scanId3Frames(std::ifstream& fin, uint32_t tag_size, bool verbose = false);
 
 #endif //MLI_ID3_PARSER_H

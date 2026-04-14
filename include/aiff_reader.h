@@ -5,10 +5,9 @@
 #ifndef MLI_AIFF_READER_H
 #define MLI_AIFF_READER_H
 #include <array>
+#include <vector>
 
 // Audio IFF uses big-endian order, meaning the most significant byte is stored at the smallest memory address
-
-void read(const std::string& filename);
 
 struct chunkHeader {
     std::array<char, 4> ckID;   // (32 bits)
@@ -35,5 +34,7 @@ struct commonChunk {
     // for the distribution of channels in multichannel files. For stereo channel 1 is left and 2 is right.
 };
 #pragma pack(pop)
+
+void extractID3(const std::string& filename, bool verbose = false);
 
 #endif //MLI_AIFF_READER_H
