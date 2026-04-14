@@ -35,7 +35,8 @@ void read(const std::string& filename) {
 
             if (ckID == "ID3 ") {
                 std::cout << "Passing fstream to id3_parser by reference" << "\n";
-                parseId3Header(fin);
+                id3Header id3_header = parseId3Header(fin);
+                scanId3Frames(fin, fromSynchsafe32(id3_header.size));
             }
 
             // Determine how far we skip ahead, which is equal to the size of data in the chunk.

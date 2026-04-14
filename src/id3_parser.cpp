@@ -5,13 +5,11 @@
 #include "id3_parser.h"
 #include <fstream>
 #include <iostream>
-
 #include "util/helpers.h"
 
-//
-// Accepts an fstream at the start of an ID3 tag and parses it.
-//
-void parseId3Header(std::ifstream& fin) {
+
+// Accepts an fstream at the start of an ID3 tag and parses the header(s).
+id3Header parseId3Header(std::ifstream& fin) {
     id3Header id3_tag_header{};
     fin.read(reinterpret_cast<char*>(&id3_tag_header), sizeof(id3_tag_header));
     std::cout << "=== ID3 Tag Header ===" << "\n";
@@ -21,12 +19,33 @@ void parseId3Header(std::ifstream& fin) {
     std::cout << "flags: " << flags << "\n";
     std::cout << "size: " << fromSynchsafe32(id3_tag_header.size) << "\n";
 
-    // If file has an extended header, skip past it.                76543210
-    // Meaning flag b, which is bit 6, is set. (considering flags = abcd0000)
+    // If file has an extended header, skip past it.                                bit: 76543210
+    // If flag b is set, which is bit 6, it has an extended header. (considering flags = abcd0000)
     if (id3_tag_header.flags & (1 << 6 )) {
         std::array<uint8_t, 4> extended_header_size{};
         fin.read(reinterpret_cast<char*>(&extended_header_size), sizeof(extended_header_size));
         // Skip ahead extended_header_size bytes from current position:
         fin.seekg(fromSynchsafe32(extended_header_size), std::ios_base::cur);
+    }
+
+    return id3_tag_header;
+}
+
+// Accepts an fstream at past the ID3 header and scans the location of the frames.
+void scanId3Frames(std::ifstream& fin, const uint32_t tag_size) {
+    const int curr = fin.tellg(); // Current pos on the ifstream
+    while (fin.good() && fin.tellg() < curr + tag_size) {
+        id3FrameHeader id3_frame_header{};
+        fin.read(reinterpret_cast<char*>(&id3_frame_header), sizeof(id3_frame_header));
+
+        // Optional? Maybe this can be deleted after removing the couts in this function.
+        // Exit when reaching padding bytes
+        if (id3_frame_header.frame_id[0] == '\0') break;
+
+        std::cout << "frame: " << charsToStr(id3_frame_header.frame_id);
+        std::cout << ", size: " << fromSynchsafe32(id3_frame_header.size) << "\n";
+
+        // Skip ahead to next frame header:
+        fin.seekg(fromSynchsafe32(id3_frame_header.size), std::ios_base::cur);
     }
 }

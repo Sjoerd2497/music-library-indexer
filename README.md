@@ -19,7 +19,8 @@ These are:
 [x] Read FORM chunk  
 [x] Read all chunk headers (ID + size)  
 [x] Read ID3 tag header  
-[ ]   
+[ ] Scan ID3 frames  
+[ ] Read ID3 frames  
 ...  
 [ ] Read ID3v2.4.0 tags  
 ...  

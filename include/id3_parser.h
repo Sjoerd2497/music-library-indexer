@@ -10,8 +10,6 @@
 // https://id3.org/id3v2.3.0#ID3_tag_version_2.3.0
 // https://id3.org/id3v2.4.0-structure
 
-void parseId3Header(std::ifstream& fin);
-
 #include <array>
 
 #pragma pack(push, 1) // Prevent compiler from adding padding bytes.
@@ -27,5 +25,16 @@ struct id3Header {
     std::array<uint8_t, 4> size;            // 32 bits Synchsafe integer (4 * %0xxxxxxx)
 };
 #pragma pack(pop)
+
+#pragma pack(push, 1)
+struct id3FrameHeader {
+    std::array<char, 4> frame_id;           // 32 bits, four characters
+    std::array<uint8_t, 4> size;            // 32 bits Synchsafe integer (4 * %0xxxxxxx)
+    std::array<uint8_t, 2> flags;           // 16 bits, two flag bytes
+};
+#pragma pack(pop)
+
+id3Header parseId3Header(std::ifstream& fin);
+void scanId3Frames(std::ifstream& fin, uint32_t tag_size);
 
 #endif //MLI_ID3_PARSER_H
