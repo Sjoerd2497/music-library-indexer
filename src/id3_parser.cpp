@@ -11,7 +11,7 @@
 
 
 // Accepts an fstream at the start of an ID3 tag and parses the header(s).
-id3Header parseId3Header(std::ifstream& fin, bool verbose) {
+id3Header parseId3Header(std::ifstream& fin, const bool verbose) {
     id3Header id3_tag_header{};
     fin.read(reinterpret_cast<char*>(&id3_tag_header), sizeof(id3_tag_header));
     if (verbose) {
@@ -53,12 +53,74 @@ std::map<std::string, std::vector<std::string>> extractId3Frames(std::ifstream& 
             std::cout << "frame: " << charsToStr(id3_frame_header.frame_id);
             std::cout << ", size: " << fromSynchsafe32(id3_frame_header.size) << "\n";
         }
+
         const uint32_t size = fromSynchsafe32(id3_frame_header.size);
-        std::vector<uint8_t> buffer(size);
-        fin.read(reinterpret_cast<char*>(buffer.data()), size);
-        std::string frame_data(buffer.begin(), buffer.end());
-        if (charsToStr(id3_frame_header.frame_id) == "APIC") frame_data = base64Encode(buffer);
-        frames[charsToStr(id3_frame_header.frame_id)].push_back(frame_data);
+        std::vector<uint8_t> frame_data(size);
+        fin.read(reinterpret_cast<char*>(frame_data.data()), fromSynchsafe32(id3_frame_header.size));
+
+        id3Frame id3_frame{
+            id3_frame_header,
+            std::move(frame_data),
+        };
+
+        std::string frame{};
+        // If frame_id starts with a "T" (i.e. "TXXX"), it is a text frame
+        if (charsToStr(id3_frame.header.frame_id)[0] == 'T') {
+            frame = readTextFrameData(id3_frame);
+        } else {
+            //
+        }
+        // fin.read(reinterpret_cast<char*>(buffer.data()), size);
+        if (charsToStr(id3_frame.header.frame_id) == "APIC") frame = base64Encode(id3_frame.data);
+        frames[charsToStr(id3_frame.header.frame_id)].push_back(frame);
     }
     return frames;
+}
+
+std::string readTextFrameData(const id3Frame &frame) {
+    // Read first byte for encoding
+    const uint8_t encoding = frame.data[0];
+
+    // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
+    // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All
+    //       strings in the same frame SHALL have the same byteorder.
+    //       Terminated with $00 00.
+    // $02   UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM.
+    //       Terminated with $00 00.
+    // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
+
+    std::__wrap_iter<const unsigned char *> start;
+    std::__wrap_iter<const unsigned char *> end;
+
+    switch (encoding) {
+        case 0:
+            // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
+            start = frame.data.begin() + 1;
+            end = frame.data.end()-1;
+            break;
+        case 1:
+            // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All
+            //       strings in the same frame SHALL have the same byteorder.
+            //       Terminated with $00 00.
+            start = frame.data.begin() + 1;
+            end = frame.data.end()-2;
+            break;
+        case 2:
+            // $02   UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM.
+            //       Terminated with $00 00.
+            start = frame.data.begin() + 1;
+            end = frame.data.end()-2;
+            break;
+        case 3:
+            // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
+            start = frame.data.begin() + 1;
+            end = frame.data.end()-1;
+            break;
+        default:
+            break;
+    }
+
+    std::cout << "encoding: " << +encoding << "\n";
+    std::string frame_string(start, end);
+    return frame_string;
 }

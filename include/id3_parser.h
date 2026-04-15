@@ -34,7 +34,13 @@ struct id3FrameHeader {
 };
 #pragma pack(pop)
 
+struct id3Frame {
+    id3FrameHeader header;
+    std::vector<uint8_t> data;
+};
+
 id3Header parseId3Header(std::ifstream& fin, bool verbose = false);
 std::map<std::string, std::vector<std::string>> extractId3Frames(std::ifstream& fin, uint32_t tag_size, bool verbose = false);
+std::string readTextFrameData(const id3Frame &frame);
 
 #endif //MLI_ID3_PARSER_H

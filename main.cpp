@@ -25,6 +25,7 @@ int main() {
 
     for (const auto& [key, value] : id3_tag) {
         for (const auto & i : value) {
+            if (key == "APIC") continue;
             std::cout << '[' << key << "] = " << i << "; " << std::endl;
         }
     }
