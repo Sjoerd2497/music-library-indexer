@@ -6,8 +6,10 @@
 #define MLI_ID3_PARSER_H
 #include <iosfwd>
 #include <array>
+#include <cstdint>
 #include <vector>
 #include <map>
+
 
 // ID3v2 also uses big-endian order
 // https://id3.org/id3v2.3.0#ID3_tag_version_2.3.0

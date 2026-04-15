@@ -3,6 +3,9 @@
 //
 
 #include "aiff_reader.h"
+
+#include <format>
+
 #include "id3_parser.h"
 #include "util/helpers.h"
 #include <fstream>

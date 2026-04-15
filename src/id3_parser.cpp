@@ -3,6 +3,8 @@
 //
 
 #include "id3_parser.h"
+
+#include <bitset>
 #include <fstream>
 #include <iostream>
 
@@ -89,8 +91,8 @@ std::string readTextFrameData(const id3Frame &frame) {
     //       Terminated with $00 00.
     // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
 
-    std::__wrap_iter<const unsigned char *> start;
-    std::__wrap_iter<const unsigned char *> end;
+    auto start = frame.data.begin();
+    auto end = frame.data.end();
 
     switch (encoding) {
         case 0:

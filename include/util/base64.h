@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstring>
 
 // https://en.wikipedia.org/wiki/Base64
 

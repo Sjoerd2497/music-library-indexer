@@ -5,7 +5,9 @@
 #ifndef MLI_AIFF_READER_H
 #define MLI_AIFF_READER_H
 #include <array>
+#include <cstdint>
 #include <map>
+#include <string>
 #include <vector>
 
 // Audio IFF uses big-endian order, meaning the most significant byte is stored at the smallest memory address
