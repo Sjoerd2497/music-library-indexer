@@ -1,5 +1,6 @@
 # Music library indexer
-A CLI app that reads all AIFF files in the current (and sub-) directories.  
+A CLI app that reads all AIFF files in the current (
+and sub-) directories. Still a work-in-progress.  
 
 ## 1. Getting started
 In `/music` you will find a sample .aiff file. 
@@ -32,14 +33,14 @@ pass it to the id3_parser.
 Parse ID3 header, scan and read frames. 
 
   
-`util/helpers.h`  
+`include/util/helpers.h`  
 Header-only helper functions.  
   
-`util/base64.h`  
+`include/util/base64.h`  
 Header-only Base64 encoder and decoder. Stand-alone,
 free to use in your projects.  
 
-`util/json.hpp`  
+`include/util/json.hpp`  
 Header-only json library by github.com/nlohmann 
 under MIT License.
 
