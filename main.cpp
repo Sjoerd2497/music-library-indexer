@@ -15,11 +15,14 @@
 
 
 #include <iostream>
+#include <filesystem>
 #include "aiff_reader.h"
 #include "util/base64.h"
 
 int main() {
-    std::string filename = "/Users/sjoerd/git/music-library-indexer/music/Unherluferlick.aiff";
+    const std::string project_root = PROJECT_ROOT;
+    const std::string filename = project_root + "/music/sample_break.aiff";
+
     std::map<std::string, std::vector<std::string>> id3_tag;
     id3_tag = extractID3(filename);
 

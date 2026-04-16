@@ -2,12 +2,10 @@
 // Created by Sjoerd de Jonge on 03/04/2026.
 //
 
-#include "id3_parser.h"
-
 #include <bitset>
 #include <fstream>
 #include <iostream>
-
+#include "id3_parser.h"
 #include "util/base64.h"
 #include "util/helpers.h"
 
@@ -98,7 +96,7 @@ std::string readTextFrameData(const id3Frame &frame) {
         case 0:
             // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
             start = frame.data.begin() + 1;
-            end = frame.data.end()-1;
+            end = frame.data.end();
             break;
         case 1:
             // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All

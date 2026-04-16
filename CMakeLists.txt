@@ -13,4 +13,6 @@ add_executable(${PROJECT_NAME} main.cpp
         include/util/json.hpp
 )
 
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 target_include_directories(${PROJECT_NAME} PRIVATE include)
