@@ -23,8 +23,7 @@ int main() {
     const std::string project_root = PROJECT_ROOT;
     const std::string filename = project_root + "/music/sample_break.aiff";
 
-    std::map<std::string, std::vector<std::string>> id3_tag;
-    id3_tag = extractID3(filename);
+    std::map<std::string, std::vector<std::string> > id3_tag = extractID3(filename);
 
     for (const auto& [key, value] : id3_tag) {
         for (const auto & i : value) {

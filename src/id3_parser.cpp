@@ -38,10 +38,10 @@ ID3Header parseId3Header(std::ifstream& fin, const bool verbose) {
 }
 
 // Accepts an fstream at past the ID3 header and scans the location of the frames.
-std::map<std::string, std::vector<std::string>> extractId3Frames(std::ifstream& fin, const uint32_t tag_size, bool verbose) {
+std::map<std::string, std::vector<std::string>> extractId3Frames(std::ifstream& fin, const uint32_t id3_size, const bool verbose) {
     std::map<std::string, std::vector<std::string>> frames;
     const int curr = fin.tellg(); // Current pos on the ifstream
-    while (fin.good() && fin.tellg() < curr + tag_size) {
+    while (fin.good() && fin.tellg() < curr + id3_size) {
         ID3FrameHeader id3_frame_header{};
         fin.read(reinterpret_cast<char*>(&id3_frame_header), sizeof(id3_frame_header));
 
@@ -64,65 +64,85 @@ std::map<std::string, std::vector<std::string>> extractId3Frames(std::ifstream& 
         };
 
         std::string frame{};
-        // If frame_id starts with a "T" (i.e. "TXXX"), it is a text frame
-        if (charsToStr(id3_frame.header.frame_id)[0] == 'T') {
-            frame = readTextFrameData(id3_frame);
-        } else {
-            //
-        }
+        // TODO: Parse the frame data according to frame type
+        // TODO: Research std::visit and/or consider alternatives
+        auto parsed = id3_frame.parse();
+        std::visit([](const auto& value) {
+            using T = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<T, TextInformationFrame>) {
+                // handle TextInformationFrame
+            } else if constexpr (std::is_same_v<T, TXXX>) {
+                // handle TXXX
+            } else if constexpr (std::is_same_v<T, APIC>) {
+                // handle APIC
+            } else if constexpr (std::is_same_v<T, std::monostate>) {
+                // unknown/empty frame, skip
+            }
+        }, parsed);
+
+        // TODO: Remove after finishing ID3Frame parse() functionality
+        // // If frame_id starts with a "T" (i.e. "TXXX"), it is a text frame
+        // if (charsToStr(id3_frame.header.frame_id)[0] == 'T') {
+        //     frame = readTextFrameData(id3_frame);
+        // } else {
+        //     //
+        // }
         // fin.read(reinterpret_cast<char*>(buffer.data()), size);
+
+        // TODO: Refactor APIC base64Encode
         if (charsToStr(id3_frame.header.frame_id) == "APIC") frame = base64Encode(id3_frame.data);
         frames[charsToStr(id3_frame.header.frame_id)].push_back(frame);
     }
     return frames;
 }
 
-std::string readTextFrameData(const ID3Frame &frame) {
-    // Read first byte for encoding
-    const uint8_t encoding = frame.data[0];
-
-    // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
-    // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All
-    //       strings in the same frame SHALL have the same byteorder.
-    //       Terminated with $00 00.
-    // $02   UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM.
-    //       Terminated with $00 00.
-    // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
-
-    auto start = frame.data.begin();
-    auto end = frame.data.end();
-
-    switch (encoding) {
-        case 0:
-            // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
-            start = frame.data.begin() + 1;
-            end = frame.data.end();
-            break;
-        case 1:
-            // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All
-            //       strings in the same frame SHALL have the same byteorder.
-            //       Terminated with $00 00.
-            start = frame.data.begin() + 1;
-            end = frame.data.end()-2;
-            break;
-        case 2:
-            // $02   UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM.
-            //       Terminated with $00 00.
-            start = frame.data.begin() + 1;
-            end = frame.data.end()-2;
-            break;
-        case 3:
-            // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
-            start = frame.data.begin() + 1;
-            end = frame.data.end()-1;
-            break;
-        default:
-            break;
-    }
-
-    std::cout << "encoding: " << +encoding << "\n";
-    std::string frame_string(start, end);
-    return frame_string;
-}
+// TODO: Remove after finishing ID3Frame parse() functionality
+// std::string readTextFrameData(const ID3Frame &frame) {
+//     // Read first byte for encoding
+//     const uint8_t encoding = frame.data[0];
+//
+//     // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
+//     // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All
+//     //       strings in the same frame SHALL have the same byteorder.
+//     //       Terminated with $00 00.
+//     // $02   UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM.
+//     //       Terminated with $00 00.
+//     // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
+//
+//     auto start = frame.data.begin();
+//     auto end = frame.data.end();
+//
+//     switch (encoding) {
+//         case 0:
+//             // $00   ISO-8859-1 [ISO-8859-1]. Terminated with $00.
+//             start = frame.data.begin() + 1;
+//             end = frame.data.end();
+//             break;
+//         case 1:
+//             // $01   UTF-16 [UTF-16] encoded Unicode [UNICODE] with BOM. All
+//             //       strings in the same frame SHALL have the same byteorder.
+//             //       Terminated with $00 00.
+//             start = frame.data.begin() + 1;
+//             end = frame.data.end()-2;
+//             break;
+//         case 2:
+//             // $02   UTF-16BE [UTF-16] encoded Unicode [UNICODE] without BOM.
+//             //       Terminated with $00 00.
+//             start = frame.data.begin() + 1;
+//             end = frame.data.end()-2;
+//             break;
+//         case 3:
+//             // $03   UTF-8 [UTF-8] encoded Unicode [UNICODE]. Terminated with $00.
+//             start = frame.data.begin() + 1;
+//             end = frame.data.end()-1;
+//             break;
+//         default:
+//             break;
+//     }
+//
+//     std::cout << "encoding: " << +encoding << "\n";
+//     std::string frame_string(start, end);
+//     return frame_string;
+// }
 
 
