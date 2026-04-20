@@ -24,15 +24,12 @@
 
 int main() {
     const std::string project_root = PROJECT_ROOT;
-    // const std::string filename = "/Users/sjoerd/Music/Unherluferlick.aiff";
-    const std::string filename = project_root + "/music/sample_break.aiff";
-    const std::string directory_path = project_root + "/music";
-    // Create an if-stream to open the file.
-    std::ifstream fin{ filename, std::ios_base::binary };
+    // const std::string directory_path = project_root + "/music";
+    const std::string directory_path = "/Users/sjoerd/Music/DJ";
 
     // Recursive directory scanning:
     const nlohmann::json library = libraryToJson(directory_path);
-    std::cout << "Recursive library JSON: \n" << library.dump() << std::endl;
+    std::cout << "Recursive library JSON: \n" << library.dump(1) << std::endl;
     // Non-recursive directory scanning:
     const nlohmann::json library2 = libraryToJson(directory_path, false);
     std::cout << "Non recursive library JSON: \n" << library2.dump() << std::endl;

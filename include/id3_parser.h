@@ -75,8 +75,8 @@ struct TextInformationFrame : public ID3Frame {
 
     // Constructs a TextInformationFrame, throws on error.
     explicit TextInformationFrame(const ID3FrameHeader frame_header, const std::vector<uint8_t>& data) {
-        // Data should never be empty
-        if (data.empty()) throw std::runtime_error("TextInformationFrame: empty frame");
+        // Data should never empty
+        if (data.empty()) throw std::runtime_error("TextInformationFrame: empty frame of type " + frame_header.frameIdToStr());
 
         this->header = frame_header;
         encoding = data[0];
@@ -85,46 +85,18 @@ struct TextInformationFrame : public ID3Frame {
 
     // Append this frame to the JSON.
     void toJson(nlohmann::json& song) const override {
-        song[header.frameIdToStr()] = value;
+        if (!value.empty()) song[header.frameIdToStr()] = value;
     }
 
 private:
-    static std::string parseTextInformationFrame(const std::vector<uint8_t>& data, const uint8_t& text_encoding) {
+    static std::string parseTextInformationFrame(const std::vector<uint8_t>& data, const uint8_t text_encoding) {
         // TODO: Needs to account for scenarios where data is corrupted/not according to spec
-        std::string result;
-        switch (text_encoding) {
-            case 0: {
-                // ISO-8859-1, terminated with $00 and 1 byte per char.
-                const auto it_begin = data.begin() + 1; // Skip first byte, used for encoder
-                const auto it_end = std::find(it_begin, data.end(), '\0');
-                result = std::string(it_begin, it_end);
-                break;
-            }
-            case 3: {
-                // UTF-8, terminated with $00 and 1 byte per char.
-                const auto it_begin = data.begin() + 1; // Skip first byte, used for encoder
-                const auto it_end = std::find(it_begin, data.end(), '\0');
-                result = std::string(it_begin, it_end);
-                break;
-            }
-            case 1: {
-                // UTF-16, terminated with $00 00 and 2 bytes per char. With byte order mark (BOM)
-                // determining endianness. BOM is either FE FE (little endian) or FE FF (big endian).
-                // TODO: Add UTF-16 support.
-                std::cerr << "UTF-16 text is not yet supported.\n";
-                break;
-            }
-            case 2: {
-                // UTF-16BE, terminated with $00 00 and 2 bytes per char.
-                // TODO: Add UTF-16BE support.
-                std::cerr << "UTF-16BE text is not yet supported.\n";
-                break;
-            }
-            default: {
-                std::cerr << "Text encoding was not recognized.\n";
-                break;
-            }
-        }
+        const auto it_begin = data.begin() + 1; // Skip first byte, used for encoder
+        const auto it_end = std::find(it_begin, data.end(), '\0');
+
+        // Passing iterators so I won't have to copy the vector
+        std::string result = toUtf8(it_begin, it_end, text_encoding);
+
         return result;
     }
 };
@@ -148,45 +120,38 @@ struct TXXX : public ID3Frame {
 
     // Append this frame to the JSON.
     void toJson(nlohmann::json& song) const override {
-        song["TXXX"][description] = value;
+        if (!description.empty() || !value.empty()) song["TXXX"][description] = value;
     }
 
 private:
-    static std::pair<std::string, std::string> parseTXXXFrame(const std::vector<uint8_t>& data, const uint8_t& text_encoding) {
-        std::string desc;
-        std::string val;
-        switch (text_encoding) {
-            case 0:
-                // ISO-8859-1, terminated with $00 and 1 byte per char.
-            case 3: {
-                // UTF-8, terminated with $00 and 1 byte per char.
-                auto it_begin = data.begin() + 1; // Skip first byte, used for encoder
-                auto it_end = std::find(it_begin, data.end(), '\0');
-                desc = std::string(it_begin, it_end);
-                it_begin = it_end + 1;
-                it_end = std::find(it_begin, data.end(), '\0');
-                val = std::string(it_begin, it_end);
-                break;
-            }
-            case 1: {
-                // UTF-16, terminated with $00 00 and 2 bytes per char. With byte order mark (BOM)
-                // determining endianness. BOM is either FE FE (little endian) or FE FF (big endian).
-                // TODO: Add UTF-16 support.
-                std::cerr << "UTF-16 text is not yet supported.\n";
-                break;
-            }
-            case 2: {
-                // UTF-16BE, terminated with $00 00 and 2 bytes per char.
-                // do magic stuff
-                // TODO: Add UTF-16BE support.
-                std::cerr << "UTF-16BE text is not yet supported.\n";
-                break;
-            }
-            default: {
-                std::cerr << "Text encoding was not recognized.\n";
-                break;
-            }
-        }
+    // text_encoding: 0 = ISO-8859-1, 1 = UTF-16, 2 = UTF-16BE, 3 = UTF-8
+    static std::pair<std::string, std::string> parseTXXXFrame(const std::vector<uint8_t>& data, const uint8_t text_encoding) {
+        // For UTF-16 the terminating byte is double
+        const bool is_double_byte = (text_encoding == 1 || text_encoding == 2);
+        // TODO: Determine endianness from BOM for the UTF-16 case here
+
+        // TODO: Refactor this code in new function that reads a field (up to null terminator)
+        auto it_begin = (is_double_byte)
+                            ? data.begin() + 3
+                            : data.begin() + 1;
+        auto it_end = (is_double_byte)
+                          ? findTerminatingIterator(it_begin, data.end())
+                          : std::find(it_begin, data.end(), 0x00);
+        std::string desc = toUtf8(it_begin, it_end, text_encoding);
+
+        // We continue from the end position:
+        it_begin = it_end;
+
+        // If there is no more data, end here.
+        if (it_begin == data.end()) return {desc, ""};
+
+        // Advance it_begin to the next byte(s) to find the next part
+        // TODO: Review this again to catch issues with malformed data (what if there is only one byte left?)
+        std::advance(it_begin, (is_double_byte)? 2 : 1);
+        it_end = (is_double_byte)
+                     ? findTerminatingIterator(it_begin, data.end())
+                     : std::find(it_begin, data.end(), 0x00);
+        std::string val = toUtf8(it_begin, it_end, text_encoding);
 
         return {desc, val};
     }
@@ -214,46 +179,39 @@ struct COMM : public ID3Frame {
     // Append this frame to the JSON.
     void toJson(nlohmann::json& song) const override {
         // TODO: Add language field to JSON
-        song["COMM"][description] = value;
+        if (!description.empty() || !value.empty()) song["COMM"][description] = value;
     }
 
 private:
     static std::pair<std::string, std::string> parseCOMMFrame(const std::vector<uint8_t>& data, const uint8_t& text_encoding) {
         // TODO: Looks identical to parseTXXXFrame(), maybe combine or inherit?
-        std::string desc;
-        std::string val;
-        switch (text_encoding) {
-            case 0:
-                // ISO-8859-1, terminated with $00 and 1 byte per char.
-            case 3: {
-                // UTF-8, terminated with $00 and 1 byte per char.
-                auto it_begin = data.begin() + 4; // Skip 4bytes, encoder + language
-                auto it_end = std::find(it_begin, data.end(), '\0');
-                desc = std::string(it_begin, it_end);
-                it_begin = it_end + 1;
-                it_end = std::find(it_begin, data.end(), '\0');
-                val = std::string(it_begin, it_end);
-                break;
-            }
-            case 1: {
-                // UTF-16, terminated with $00 00 and 2 bytes per char. With byte order mark (BOM)
-                // determining endianness. BOM is either FE FE (little endian) or FE FF (big endian).
-                // TODO: Add UTF-16 support.
-                std::cerr << "UTF-16 text is not yet supported.\n";
-                break;
-            }
-            case 2: {
-                // UTF-16BE, terminated with $00 00 and 2 bytes per char.
-                // do magic stuff
-                // TODO: Add UTF-16BE support.
-                std::cerr << "UTF-16BE text is not yet supported.\n";
-                break;
-            }
-            default: {
-                std::cerr << "Text encoding was not recognized.\n";
-                break;
-            }
-        }
+        // For UTF-16 the terminating byte is double
+        const bool is_double_byte = (text_encoding == 1 || text_encoding == 2);
+        // TODO: Determine endianness from BOM for the UTF-16 case here
+
+        // TODO: Refactor this code in new function that reads a field (up to null terminator)
+        auto it_begin = (is_double_byte)
+                            ? data.begin() + 3
+                            : data.begin() + 1;
+        auto it_end = (is_double_byte)
+                          ? findTerminatingIterator(it_begin, data.end())
+                          : std::find(it_begin, data.end(), 0x00);
+        std::string desc = toUtf8(it_begin, it_end, text_encoding);
+
+        // We continue from the end position:
+        it_begin = it_end;
+
+        // If there is no more data, end here.
+        if (it_begin == data.end()) return {desc, ""};
+
+        // Advance it_begin to the next byte(s) to find the next part
+        // TODO: Review this again to catch issues with malformed data (what if there is only one byte left?)
+        std::advance(it_begin, (is_double_byte)? 2 : 1);
+        it_end = (is_double_byte)
+                     ? findTerminatingIterator(it_begin, data.end())
+                     : std::find(it_begin, data.end(), 0x00);
+        std::string val = toUtf8(it_begin, it_end, text_encoding);
+
         return {desc, val};
     }
 };
@@ -281,6 +239,7 @@ struct APIC : public ID3Frame {
 
     // Append this frame to the JSON.
     void toJson(nlohmann::json& song) const override {
+        if (data.empty()) return;
         song["APIC"]["MIME type"] = mime_type;
         song["APIC"]["Picture type"] = picture_type;
         song["APIC"]["Description"] = description;
@@ -289,10 +248,50 @@ struct APIC : public ID3Frame {
 
 private:
     static std::tuple<std::string, uint8_t, std::string, std::vector<uint8_t>> parseAPICFrame(const std::vector<uint8_t>& frame_data, const uint8_t text_encoding) {
-        std::string mime;
+        std::string mime{};
         uint8_t picture = 0;
         std::string desc;
         std::vector<uint8_t> picture_data{};
+
+        // // For UTF-16 the terminating byte is double
+        // const bool is_double_byte = (text_encoding == 1 || text_encoding == 2);
+        // // TODO: Refactor this code and check for safety with malformed data
+        // auto it_begin = (is_double_byte)
+        //                     ? frame_data.begin() + 3
+        //                     : frame_data.begin() + 1;
+        // auto it_end = (is_double_byte)
+        //                   ? findTerminatingIterator(it_begin, frame_data.end())
+        //                   : std::find(it_begin, frame_data.end(), 0x00);
+        // mime = toUtf8(it_begin, it_end, text_encoding);
+        //
+        // it_begin = it_end;
+        // // If there is no more data, end here.
+        // if (it_begin == frame_data.end()) return {mime, picture, desc, picture_data};
+        // // TODO: This needs a check to see if it_end + 2 is a valid address
+        // std::advance(it_begin, (is_double_byte)? 2 : 1);
+        //
+        // picture = *it_begin;
+        //
+        // // TODO: This needs a check to see if it_end + 2 is a valid address
+        // std::advance(it_begin, (is_double_byte)? 2 : 1);
+        // // If there is no more data, end here.
+        // if (it_begin == frame_data.end()) return {mime, picture, desc, picture_data};
+        //
+        // it_end = (is_double_byte)
+        //     ? findTerminatingIterator(it_begin, frame_data.end())
+        //     : std::find(it_begin, frame_data.end(), 0x00);
+        //
+        // desc = toUtf8(it_begin, it_end, text_encoding);
+        //
+        // it_begin = it_end;
+        // // If there is no more data, end here.
+        // if (it_begin == frame_data.end()) return {mime, picture, desc, picture_data};
+        // // TODO: This needs a check to see if it_end + 2 is a valid address
+        // std::advance(it_begin, (is_double_byte)? 2 : 1);
+        //
+        // it_end = frame_data.end();
+        // picture_data = std::vector<uint8_t>(it_begin, it_end);
+
         switch (text_encoding) {
             case 0:
                 // ISO-8859-1, terminated with $00 and 1 byte per char.

@@ -38,11 +38,12 @@ nlohmann::json libraryToJson(const std::string& directory_path, const bool sub_d
                 try {
                     locateId3(fin); // Skip ifstream to the start of the ID3 tag.
                     const nlohmann::json song = id3ToJson(fin);
-                    library.push_back(song);
+                    if (!song.is_null()) library.push_back(song);
                 }
                 catch (const std::exception& e) {
                     std::cerr << "Error occurred: " << e.what() << "\n";
                 }
+                fin.close();
             }
         }
     };
