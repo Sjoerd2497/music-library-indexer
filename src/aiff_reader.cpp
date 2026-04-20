@@ -13,8 +13,7 @@
 #include <iostream>
 #include <map>
 
-void extractID3(const std::string& filename, nlohmann::json& song, const bool verbose) {
-    std::ifstream fin{ filename, std::ios_base::binary }; // Create an if-stream to open the AIFF.
+void locateId3(std::ifstream& fin, const bool verbose) {
     if (fin) {
         formChunk form_chunk{};
         fin.read(reinterpret_cast<char*>(&form_chunk), sizeof(form_chunk));
@@ -42,9 +41,9 @@ void extractID3(const std::string& filename, nlohmann::json& song, const bool ve
             }
 
             if (ckID == "ID3 ") {
-                if (verbose) std::cout << "Passing fstream to id3_parser by reference" << "\n";
-                ID3Header id3_header = parseId3Header(fin);
-                extractId3Frames(fin, fromSynchsafe32(id3_header.size), song, true);
+                if (verbose) std::cout << "Found ID3 tag." << "\n";
+                // Terminate function
+                return;
             }
 
             // Determine how far we skip ahead, which is equal to the size of data in the chunk.

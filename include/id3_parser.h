@@ -371,7 +371,6 @@ private:
 ID3Header parseId3Header(std::ifstream& fin, bool verbose = false);
 void extractId3Frames(std::ifstream& fin, uint32_t id3_size, nlohmann::json& song, bool verbose = false);
 std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uint8_t>& data);
-// TODO: Delete after refactoring parsing:
-// std::string readTextFrameData(const ID3Frame &frame);
+nlohmann::json id3ToJson(std::ifstream& fin, bool verbose = false);
 
 #endif //MLI_ID3_PARSER_H

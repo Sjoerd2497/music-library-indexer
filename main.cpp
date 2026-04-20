@@ -4,7 +4,7 @@
  *  2026-03-28
  *
  *  Method:
- *  1. Create empty JSON string.
+ *  1. Create empty JSON.
  *  2. Loop through all files in current directory.
  *      2a. For each .aiff file:
  *          Add new object to JSON.
@@ -16,8 +16,9 @@
 
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 #include "aiff_reader.h"
-#include "util/base64.h"
+#include "id3_parser.h"
 #include "util/json.hpp"
 
 int main() {
@@ -25,11 +26,13 @@ int main() {
     // const std::string filename = "/Users/sjoerd/Music/Unherluferlick.aiff";
     const std::string filename = project_root + "/music/sample_break.aiff";
 
+    // Create an if-stream to open the file.
+    std::ifstream fin{ filename, std::ios_base::binary };
 
-    // JSON to store the song tag data
-    nlohmann::json song;
+    // Skip ifstream to the start of the ID3 tag.
+    locateId3(fin);
 
-    extractID3(filename, song);
+    const nlohmann::json song = id3ToJson(fin);
 
     std::cout << song.dump() << std::endl;
     return 0;

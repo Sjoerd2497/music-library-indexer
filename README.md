@@ -1,17 +1,48 @@
 # Music library indexer
-A CLI app that reads all AIFF files in the current (
-and sub-) directories. Still a work-in-progress.  
+A CLI app that reads all AIFF files in the current (and sub-)
+directories, and extracts their ID3 tags. 
+Still a work-in-progress.  
 
 ## 1. Getting started
-In `/music` you will find a sample .aiff file. 
+In `/music` you will find the example file `sample_break.aiff`. 
 Running this program will read its ID3 tags.
 
-## 2. Approach
+## 2. Features
+* Supported music files
+  * `.aiff`
+* ID3 frames
+  * Text frames
+    * `[TIT1]` Content group description
+    * `[TIT2]` Song title
+    * `[TIT3]` Subtitle/Description refinement
+    * `[TALB]` Album name
+    * `[TPE1]` Artist
+    * `[TPE2]` Band/Orchestra/Accompaniment
+    * `[TPE3]` Conductor
+    * `[TPE4]` Interpreted, remixed, or otherwise modified by
+    * `[TDRC]` Recording time
+    * `[TPUB]` Record label
+    * `[TXXX]` User defined text frame
+    * `[T...]` All other text frames are also (likely) supported
+  * `[COMM]` Comments
+  * `[APIC]` Album cover image encoded in JSON (Base64)
+* Supported ID3 frame text encoding
+  * `ISO-8859-1`
+  * `UTF-8`
+* Output
+  * `JSON`
+
+### Not (yet) implemented
+* Unsupported frame text encoding
+    * `UTF-16`
+    * `UTF-16BE`
+
+## 3. Approach
 1. Scan all files in current directory
-2. Loop through all .aiff files
+2. Loop through all `.aiff` files
 3. Loop through all subdirectories and start at step 1
 
-### For each .aiff file  
+### For each `.aiff` file  
 1. Read AIFF file  
 2. Scan all chunks  
 3. Locate ID3 chunk
@@ -22,7 +53,7 @@ Running this program will read its ID3 tags.
 All frames will be added to JSON. Later on I can decide which I find relevant 
 (for example artist, title, genre, label),
 
-## 3. Structure
+## 4. Contents
 `main.cpp`  
   
 `src/aiff_reader.cpp`  
@@ -44,16 +75,22 @@ free to use in your projects.
 Header-only json library by github.com/nlohmann 
 under MIT License.
 
-## 4. Milestones  
-[x] Read FORM chunk  
-[x] Read all chunk headers (ID + size)  
-[x] Read ID3 tag header  
-[x] Scan ID3 frames  
-[x] Read ID3 frames  
-[x] Write a Base64 encoder  
-[x] (Optional) Write a Base64 decoder  
-[x] Parse ID3 frames  
-[x] Append ID3 frames to JSON     
-[ ] Accept input arguments (`mli index`, `mli index -verbose`)  
-[ ] Iterate through all files in directory to extract tags  
-[ ] Iterate through all subfolders to extract all tags  
+## 5. Milestones  
+### For the MVP
+`[x]` Read FORM chunk  
+`[x]` Read all chunk headers (ID + size)  
+`[x]` Read ID3 tag header  
+`[x]` Scan ID3 frames  
+`[x]` Read ID3 frames  
+`[x]` Write a Base64 encoder  
+`[x] `(Optional) Write a Base64 decoder  
+`[x]` Parse ID3 frames  
+`[x]` Append ID3 frames to JSON      
+`[ ]` Iterate through all files in directory to extract tags  
+`[ ]` Iterate through all subfolders to extract all tags  
+`[ ]` Accept input arguments (`mli index`, `mli index -verbose`)  
+
+### Wishlist
+`[x]` Decouple the ID3 parsing logic from the AIFF reader.  
+`[ ]` Add support for other music files that can contain ID3  
+`[ ]` Add support for `UTF-16(BE)` text encoding
