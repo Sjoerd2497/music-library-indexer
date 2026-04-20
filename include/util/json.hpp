@@ -2575,7 +2575,7 @@ JSON_HEDLEY_DIAGNOSTIC_POP
     #define JSON_ASSERT(x) assert(x)
 #endif
 
-// allow accessing some private functions (needed by the test suite)
+// allow accessing some private functions (needed by the test1 suite)
 #if defined(JSON_TESTS_PRIVATE)
     #define JSON_PRIVATE_UNLESS_TESTED public
 #else
@@ -5486,7 +5486,7 @@ inline void from_json(const BasicJsonType& j, std_fs::path& p)
     const auto& s = *j.template get_ptr<const typename BasicJsonType::string_t*>();
     // Checking for C++20 standard or later can be insufficient in case the
     // library support for char8_t is either incomplete or was disabled
-    // altogether. Use the __cpp_lib_char8_t feature test instead.
+    // altogether. Use the __cpp_lib_char8_t feature test1 instead.
 #if defined(__cpp_lib_char8_t) && (__cpp_lib_char8_t >= 201907L)
     p = std_fs::path(std::u8string_view(reinterpret_cast<const char8_t*>(s.data()), s.size()));
 #else
@@ -12131,7 +12131,7 @@ class binary_reader
                 }
                 if (!dim.empty())  // if ndarray, convert to an object in JData annotated array format
                 {
-                    for (auto i : dim) // test if any dimension in an ndarray is 0, if so, return a 1D empty container
+                    for (auto i : dim) // test1 if any dimension in an ndarray is 0, if so, return a 1D empty container
                     {
                         if ( i == 0 )
                         {
@@ -19753,7 +19753,7 @@ class serializer
         // use the Grisu2 algorithm to produce short numbers which are
         // guaranteed to round-trip, using strtof and strtod, resp.
         //
-        // NB: The test below works if <long double> == <double>.
+        // NB: The test1 below works if <long double> == <double>.
         static constexpr bool is_ieee_single_or_double
             = (std::numeric_limits<number_float_t>::is_iec559 && std::numeric_limits<number_float_t>::digits == 24 && std::numeric_limits<number_float_t>::max_exponent == 128) ||
               (std::numeric_limits<number_float_t>::is_iec559 && std::numeric_limits<number_float_t>::digits == 53 && std::numeric_limits<number_float_t>::max_exponent == 1024);
@@ -25070,7 +25070,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
             {
                 return patch_operations::copy;
             }
-            if (op == "test")
+            if (op == "test1")
             {
                 return patch_operations::test;
             }
@@ -25284,14 +25284,14 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
                     {
                         // check if "value" matches the one at "path"
                         // the "path" location must exist - use at()
-                        success = (result.at(ptr) == get_value("test", "value", false));
+                        success = (result.at(ptr) == get_value("test1", "value", false));
                     }
                     JSON_INTERNAL_CATCH (out_of_range&)
                     {
                         // ignore out of range errors: success remains false
                     }
 
-                    // throw an exception if the test fails
+                    // throw an exception if the test1 fails
                     if (JSON_HEDLEY_UNLIKELY(!success))
                     {
                         JSON_THROW(other_error::create(501, detail::concat("unsuccessful: ", val.dump()), &val));
@@ -25304,7 +25304,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
                 default:
                 {
                     // op must be "add", "remove", "replace", "move", "copy", or
-                    // "test"
+                    // "test1"
                     JSON_THROW(parse_error::create(105, 0, detail::concat("operation value '", op, "' is invalid"), &val));
                 }
             }

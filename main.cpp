@@ -20,20 +20,22 @@
 #include "aiff_reader.h"
 #include "id3_parser.h"
 #include "util/json.hpp"
+#include "library_scanner.h"
 
 int main() {
     const std::string project_root = PROJECT_ROOT;
     // const std::string filename = "/Users/sjoerd/Music/Unherluferlick.aiff";
     const std::string filename = project_root + "/music/sample_break.aiff";
-
+    const std::string directory_path = project_root + "/music";
     // Create an if-stream to open the file.
     std::ifstream fin{ filename, std::ios_base::binary };
 
-    // Skip ifstream to the start of the ID3 tag.
-    locateId3(fin);
+    // Recursive directory scanning:
+    const nlohmann::json library = libraryToJson(directory_path);
+    std::cout << "Recursive library JSON: \n" << library.dump() << std::endl;
+    // Non-recursive directory scanning:
+    const nlohmann::json library2 = libraryToJson(directory_path, false);
+    std::cout << "Non recursive library JSON: \n" << library2.dump() << std::endl;
 
-    const nlohmann::json song = id3ToJson(fin);
-
-    std::cout << song.dump() << std::endl;
     return 0;
 }

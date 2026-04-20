@@ -4,8 +4,12 @@ directories, and extracts their ID3 tags.
 Still a work-in-progress.  
 
 ## 1. Getting started
-In `/music` you will find the example file `sample_break.aiff`. 
-Running this program will read its ID3 tags.
+In `/music` you will find the example file `sample_break.aiff`,
+as well as two directories `/test1` and `/test1/test2`. The
+`test2` directory has another song `sample_break.aiff`.
+
+Running this program will read scan through the directories in
+`/music` and extract the ID3 tags.
 
 ## 2. Features
 * Supported music files
@@ -50,8 +54,8 @@ Running this program will read its ID3 tags.
 5. Scan all frames 
 6. Append frames to JSON  
 
-All frames will be added to JSON. Later on I can decide which I find relevant 
-(for example artist, title, genre, label),
+All frames will be added to JSON. Later on I can decide which 
+I find relevant (for example artist, title, genre, label),
 
 ## 4. Contents
 `main.cpp`  
@@ -83,11 +87,11 @@ under MIT License.
 `[x]` Scan ID3 frames  
 `[x]` Read ID3 frames  
 `[x]` Write a Base64 encoder  
-`[x] `(Optional) Write a Base64 decoder  
+`[x]` (Optional) Write a Base64 decoder  
 `[x]` Parse ID3 frames  
 `[x]` Append ID3 frames to JSON      
-`[ ]` Iterate through all files in directory to extract tags  
-`[ ]` Iterate through all subfolders to extract all tags  
+`[x]` Iterate through all files in directory to extract tags  
+`[x]` Iterate through all subfolders to extract all tags  
 `[ ]` Accept input arguments (`mli index`, `mli index -verbose`)  
 
 ### Wishlist

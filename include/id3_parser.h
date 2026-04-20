@@ -98,7 +98,6 @@ private:
                 const auto it_begin = data.begin() + 1; // Skip first byte, used for encoder
                 const auto it_end = std::find(it_begin, data.end(), '\0');
                 result = std::string(it_begin, it_end);
-                std::cout << "ISO-8859-1\n";
                 break;
             }
             case 3: {
@@ -106,7 +105,6 @@ private:
                 const auto it_begin = data.begin() + 1; // Skip first byte, used for encoder
                 const auto it_end = std::find(it_begin, data.end(), '\0');
                 result = std::string(it_begin, it_end);
-                std::cout << "UTF-8\n";
                 break;
             }
             case 1: {
@@ -168,8 +166,6 @@ private:
                 it_begin = it_end + 1;
                 it_end = std::find(it_begin, data.end(), '\0');
                 val = std::string(it_begin, it_end);
-                if (text_encoding == 0) std::cout << "ISO-8859-1\n";
-                if (text_encoding == 3) std::cout << "UTF-8\n";
                 break;
             }
             case 1: {
@@ -237,8 +233,6 @@ private:
                 it_begin = it_end + 1;
                 it_end = std::find(it_begin, data.end(), '\0');
                 val = std::string(it_begin, it_end);
-                if (text_encoding == 0) std::cout << "UTF-8\n";
-                if (text_encoding == 3) std::cout << "ISO-8859-1\n";
                 break;
             }
             case 1: {
@@ -325,9 +319,6 @@ private:
 
                 it_end = frame_data.end();
                 picture_data = std::vector<uint8_t>(it_begin, it_end);
-
-                if (text_encoding == 0) std::cout << "UTF-8\n";
-                if (text_encoding == 3) std::cout << "ISO-8859-1\n";
                 break;
             }
             case 1: {

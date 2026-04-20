@@ -31,7 +31,7 @@ nlohmann::json id3ToJson(std::ifstream& fin, const bool verbose) {
 //
 // Arguments:
 // - fin: Reference to the ifstream at the start of the ID3 tag.
-// - verbose: Optional bool to enable console output, default false.
+// - verbose: Optional bool to enable console output, default = false.
 ID3Header parseId3Header(std::ifstream& fin, const bool verbose) {
     ID3Header id3_tag_header{};
     fin.read(reinterpret_cast<char*>(&id3_tag_header), sizeof(id3_tag_header));
@@ -64,7 +64,7 @@ ID3Header parseId3Header(std::ifstream& fin, const bool verbose) {
 // - fin: Reference to the ifstream at the start of the first ID3 frame.
 // - id3_size: The size of the ID3 tag, including the header.
 // - song: The JSON to store the song's ID3 data in.
-// - verbose: Optional bool to enable console output, default false.
+// - verbose: Optional bool to enable console output, default = false.
 void extractId3Frames(std::ifstream& fin, const uint32_t id3_size, nlohmann::json& song, const bool verbose) {
     const int curr = fin.tellg(); // Current pos on the ifstream, just past the ID3 header
 
@@ -94,7 +94,7 @@ void extractId3Frames(std::ifstream& fin, const uint32_t id3_size, nlohmann::jso
     }
 }
 
-//
+// Create an ID3 frame struct for the supported ID3 frames.
 std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uint8_t>& data) {
     const std::string id = header.frameIdToStr();
     if (id == "TXXX") return std::make_unique<TXXX>(header, data);
