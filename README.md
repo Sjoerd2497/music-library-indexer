@@ -33,13 +33,10 @@ Running this program will read scan through the directories in
 * Supported ID3 frame text encoding
   * `ISO-8859-1`
   * `UTF-8`
+  * `UTF-16`
+  * `UTF-16BE`
 * Output
   * `JSON`
-
-### Not (yet) implemented
-* Unsupported frame text encoding
-    * `UTF-16`
-    * `UTF-16BE`
 
 ## 3. Approach
 1. Scan all files in current directory
