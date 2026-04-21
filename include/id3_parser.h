@@ -45,12 +45,12 @@ struct ID3FrameHeader {
     std::array<uint8_t, 4> size;            // 32 bits Synchsafe integer (4 * %0xxxxxxx)
     std::array<uint8_t, 2> flags;           // 16 bits, two flag bytes
 
-    std::string frameIdToStr() const {
+    [[nodiscard]] std::string frameIdToStr() const {
         return charsToStr(frame_id);
     }
 
     // Get the size of the ID3 frame header as int32_t.
-    uint32_t getSize() const {
+    [[nodiscard]] uint32_t getSize() const {
         return fromSynchsafe32(size);
     }
 };
@@ -144,12 +144,12 @@ private:
 //     std::string lyrics;
 // };
 
-// Helper function:
+// Helper functions:
 
 // Reads a field from its start to null terminator or end, returns {field_string, iterator_past_terminator}.
 // The returned field_string is always in UTF-8.
 template <std::input_iterator Iterator>
-std::tuple<std::string, Iterator, std::optional<bool>> readFieldToUtf8(Iterator begin, Iterator end_of_vector, bool double_byte, int encoding, bool little_endian = true) {
+std::tuple<std::string, Iterator, std::optional<bool>> readFieldToUtf8(Iterator begin, Iterator end_of_vector, bool double_byte, int encoding, bool little_endian = false) {
     // UTF-16 case: check for BOM (2 bytes) for endianness and skip BOM.
     if (encoding == 1) {
         if (std::next(begin, 1) != end_of_vector) {

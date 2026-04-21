@@ -21,19 +21,19 @@ std::string charsToStr(const std::array<char, N>& value) {
 template <std::integral T>
 T fromBigEndianInt(T value) {
     if constexpr (std::endian::native == std::endian::big) {
-        // ReSharper disable once CppDFAUnreachableCode
+        // ReSharper disable once CppDFAUnreachableCode [need this for CLion to stop bugging me]
         return value;
     } else {
         return std::byteswap(value);
     }
 }
 
-// Convert a synchsafe array of 4 ints to a regular 32 bit int
+// Convert a synchsafe array of 4 ints to a regular 32 bit int.
 inline uint32_t fromSynchsafe32(const std::array<uint8_t, 4>& value) {
-    const uint32_t a = (value[0] & 0x7F) << 21;
-    const uint32_t b = (value[1] & 0x7F) << 14;
-    const uint32_t c = (value[2] & 0x7F) << 7;
-    const uint32_t d = (value[3] & 0x7F);
+    const uint32_t a = (value[0] & 0b01111111) << 21;
+    const uint32_t b = (value[1] & 0b01111111) << 14;
+    const uint32_t c = (value[2] & 0b01111111) << 7;
+    const uint32_t d = (value[3] & 0b01111111);
     const uint32_t result = a | b | c | d;
     return result;
 }
@@ -41,7 +41,7 @@ inline uint32_t fromSynchsafe32(const std::array<uint8_t, 4>& value) {
 // Convert float from big endian to native endianness.
 inline float fromBigEndianFloat(const float value) {
     if constexpr (std::endian::native == std::endian::big) {
-        // ReSharper disable once CppDFAUnreachableCode
+        // ReSharper disable once CppDFAUnreachableCode [need this for CLion to stop bugging me]
         return value;
     } else {
         auto asInt = std::bit_cast<uint32_t>(value);
@@ -68,25 +68,104 @@ template <std::input_iterator Iterator>
 std::string iso88591ToUtf8(Iterator begin, Iterator end) {
     std::string result;
     for (Iterator it = begin; it != end; ++it) {
-        if (*it < 0x80) {
+        if (*it < 0b10000000) {
             result.push_back(static_cast<char> (*it));
         } else {
-            result.push_back(static_cast<char> (0xc0 | (*it >> 6)));
-            result.push_back(static_cast<char> (0x80 | (*it & 0x3f)));
+            result.push_back(static_cast<char> (0b11000000 | (*it >> 6)));
+            result.push_back(static_cast<char> (0b10000000 | (*it & 0b00111111)));
         }
     }
     return result;
 }
 
-// inline std::string utf16ToUtf8(const std::vector<uint8_t>& data, bool little_endian) {
-//     std::string result;
-//     return result;
-// }
-//
-// inline std::string utf16beToUtf8(const std::vector<uint8_t>& data) {
-//     std::string result;
-//     return result;
-// }
+template <std::input_iterator Iterator>
+std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
+    std::string result;
+    // TODO: Edge case - Uneven number of bytes.
+
+    for (Iterator it = begin; it != end; ++++it) {
+        // TODO: Edge case - std::next(it) does not exist. (Same as Edge case - Uneven number of bytes?)
+        // 1. Construct the 16 bit (2 byte pair) number first, keeping endianness into account:
+        const uint16_t byte_pair = (little_endian)
+            ? *std::next(it, 1) << 8 | *it      // LE: First byte is low, second is high
+            : (*it << 8) | *std::next(it, 1);   // BE: First byte is high, second is low
+
+        uint32_t codepoint = 65533;      // Codepoint of the Replacement Character in case of error
+
+        // 2. Determine the Unicode codepoint:
+        if (byte_pair < 0xD800) {
+            codepoint = byte_pair;       // Byte pair maps directly to codepoint
+        }
+        else if (byte_pair < 0xDC00) {
+            // 0xD800 to 0xDBFF (0xDC00 to 0xDFFF is low surrogate)
+            // ~~~Surrogate shit~~~
+            // TODO: Edge case - No byte pair after current byte pair
+
+            // W1 = 110110yyyyyyyyyy      // 0xD800 + yyyyyyyyyy
+            // W2 = 110111xxxxxxxxxx      // 0xDC00 + xxxxxxxxxx
+            // Construct high surrogate (from current byte pair):
+            const uint16_t w1 = byte_pair;
+            // Construct low surrogate (from next byte pair):
+            const uint16_t w2 = (little_endian)
+                ? *std::next(it, 3) << 8 | *std::next(it, 2)      // LE: First byte is low, second is high
+                : (*std::next(it, 2) << 8) | *std::next(it, 3);   // BE: First byte is high, second is low
+            if (w2 < 0xDC00 || w2 > 0xDFFF) {
+                // TODO: Edge case - Low surrogate missing
+                // TODO: Edge case - Low surrogate is actually a second high surrogate
+            }
+            const uint16_t w1_ = w1 - 0xD800;
+            const uint16_t w2_ = w2 - 0xDC00;
+            // 0000001111111111
+            // 00000000000000000000001111111111
+            // 00000000000000111111111100000000
+            codepoint = (w1_ << 10) | w2_ + 0x10000;
+
+            // We already consumed the next byte pair, so advance iterator by 2 extra:
+            ++++it;
+        }
+        else if (byte_pair < 0xDFFF) {
+            // TODO: Edge case - Low surrogate appears first
+        }
+        else if (byte_pair < 0xFFFF) {
+            // 0xE000 to 0xFFFF
+            codepoint = byte_pair;       // Byte pair maps directly to codepoint
+        }
+
+        // 3. Translate the Unicode codepoint to UTF-8:
+        if (codepoint  < 0b10000000) {
+            // < 128
+            result.push_back(static_cast<char> (codepoint));
+        }
+        else if (codepoint < 0b100000000000) {
+            // 128 <= codepoint < 2048
+            // 010000000000
+            // 000000010000
+            result.push_back(static_cast<char> (0b11000000 | (codepoint >> 6)));
+            result.push_back(static_cast<char> (0b10000000 | (codepoint & 0b00111111)));
+        }
+        else if (codepoint < 0b10000000000000000) {
+            // 2048 <= codepoint < 65536
+            result.push_back(static_cast<char> (0b11100000 | (codepoint >> 12)));
+            result.push_back(static_cast<char> (0b10000000 | ((codepoint >> 6) & 0b00111111)));
+            result.push_back(static_cast<char> (0b10000000 | (codepoint & 0b00111111)));
+        }
+        else if (codepoint < 0x110000) {
+            // 65536 <= codepoint < 1114111 (Unicode maximum)
+            result.push_back(static_cast<char> (0b11110000 | (codepoint >> 18)));
+            result.push_back(static_cast<char> (0b10000000 | ((codepoint >> 12) & 0b00111111)));
+            result.push_back(static_cast<char> (0b10000000 | ((codepoint >> 6) & 0b00111111)));
+            result.push_back(static_cast<char> (0b10000000 | (codepoint & 0b00111111)));
+        }
+        else {
+            // 1114111 > codepoint or undefined error, use Replacement Character 0xEF 0xBF 0xBD
+            result.push_back(static_cast<char> (0xEF));
+            result.push_back(static_cast<char> (0xBF));
+            result.push_back(static_cast<char> (0xBD));
+        }
+    }
+
+    return result;
+}
 
 // Transform a vector with raw bytes to a string as Utf8 encoding.
 //
@@ -98,23 +177,21 @@ std::string iso88591ToUtf8(Iterator begin, Iterator end) {
 //      1 for UTF-16
 //      2 for UTF-16BE
 //      3 for UTF-8
-// - little_endian: A bool used only for UTF-16 to indicate endianness, default = true.
+// - little_endian: A bool used only for UTF-16 to indicate endianness, default = false
+//   as recommended by section 4.3 https://www.rfc-editor.org/rfc/rfc2781.
 template <std::input_iterator Iterator>
-std::string toUtf8(Iterator begin, Iterator end, const int encoding, bool little_endian = true) {
+std::string toUtf8(Iterator begin, Iterator end, const int encoding, bool little_endian = false) {
     switch (encoding) {
         case 0:
             // ISO-8859-1
             return iso88591ToUtf8(begin, end);
         case 1:
             // UTF-16
-            // TODO: Add UTF-16 support.
-            std::cerr << "UTF-16 text is not yet supported!\n";
-            // TODO: Limit console output. Is this the place for a throw()?
+            return utf16ToUtf8(begin, end, little_endian);
             break;
         case 2:
             // UTF-16BE
-            // TODO: Add UTF-16BE support.
-            std::cerr << "UTF-16BE text is not yet supported.\n";
+            return utf16ToUtf8(begin, end, false);
             break;
         case 3:
             // UTF-8

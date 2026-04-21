@@ -18,7 +18,7 @@
 // - directory_path: The path to the directory to scan for music files.
 // - sub_directories: A bool whether to also include subdirectories, default = true.
 nlohmann::json libraryToJson(const std::string& directory_path, const bool sub_directories) {
-    // TODO: Verify directory_path
+    // TODO: Verify directory_path (but it is unnecessary if user only calls from inside a directory)
 
     // Create a path:
     const auto path = std::filesystem::path(directory_path);

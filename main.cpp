@@ -4,13 +4,13 @@
  *  2026-03-28
  *
  *  Method:
- *  1. Create empty JSON.
- *  2. Loop through all files in current directory.
- *      2a. For each .aiff file:
- *          Add new object to JSON.
- *          Read file, extract ID3 frames, append frames to JSON object.
- *  3. For each subdirectory in current directory:
- *      3a. Perform step 2.
+ *  1. Read path to a directory [main.cpp]
+ *  2. Loop through all files in directory [library_scanner.cpp]
+ *  3. Open ifstream for each file with a supported format (.aiff) [aiff_reader.cpp]
+ *  4. Read ifstream to start of ID3 tag [aiff_reader.cpp]
+ *  5. Read each frame in ID3 tag, parse to string and add to JSON song
+ *  6. Add JSON song to JSON library
+ *
  */
 
 

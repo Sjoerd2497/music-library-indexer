@@ -239,47 +239,48 @@ void APIC::toJson(nlohmann::json& song) const {
 
 // (Private) Parse frame data into struct member variable(s).
 std::tuple<std::string, uint8_t, std::string, std::vector<uint8_t>> APIC::parseAPICFrame(const std::vector<uint8_t>& frame_data, const uint8_t text_encoding) {
+    // Text encoding      $xx
+    // MIME type          <text string> $00
+    // Picture type       $xx
+    // Description        <text string according to encoding> $00 (00)
+    // Picture data       <binary data>
+
     std::string mime{};
     uint8_t picture = 0;
-    std::string desc;
+    // std::string desc;
     std::vector<uint8_t> picture_data{};
 
     // For UTF-16 the terminating byte is double, except for MIME type which is always ISO-8859-1 encoding
     const bool is_double_byte = (text_encoding == 1 || text_encoding == 2);
     // TODO: Refactor this code and check for safety with malformed data
-    auto it_begin = (is_double_byte)
-                        ? frame_data.begin() + 3
-                        : frame_data.begin() + 1;
+    auto it_begin = frame_data.begin() + 1; // No BOM at start of file.
     auto it_end = std::find(it_begin, frame_data.end(), 0x00);
     mime = toUtf8(it_begin, it_end, 0); // Always ISO-8859-1 for MIME (int encoding = 0)
 
     it_begin = it_end;
     // If there is no more data, end here.
-    if (it_begin == frame_data.end()) return {mime, picture, desc, picture_data};
-    // TODO: This needs a check to see if it_end + 2 is a valid address
-    std::advance(it_begin, (is_double_byte)? 2 : 1);
+    if (it_begin == frame_data.end()) return {mime, picture, "", picture_data};
+    // Always advance by 1 because MIME has 1 byte terminator
+    std::advance(it_begin, 1);
 
     picture = *it_begin;
 
-    // TODO: This needs a check to see if it_end + 2 is a valid address
-    std::advance(it_begin, (is_double_byte)? 2 : 1);
+    std::advance(it_begin, 1);
     // If there is no more data, end here.
-    if (it_begin == frame_data.end()) return {mime, picture, desc, picture_data};
+    if (it_begin == frame_data.end()) return {mime, picture, "", picture_data};
 
-    it_end = (is_double_byte)
-        ? findTerminatingIterator(it_begin, frame_data.end())
-        : std::find(it_begin, frame_data.end(), 0x00);
+    // it_end = (is_double_byte)
+    //     ? findTerminatingIterator(it_begin, frame_data.end())
+    //     : std::find(it_begin, frame_data.end(), 0x00);
 
-    desc = toUtf8(it_begin, it_end, text_encoding);
+    // desc = toUtf8(it_begin, it_end, text_encoding);
+    auto [desc, it_after_desc, little_endian] = readFieldToUtf8(it_begin, frame_data.end(), is_double_byte, text_encoding);
 
-    it_begin = it_end;
     // If there is no more data, end here.
-    if (it_begin == frame_data.end()) return {mime, picture, desc, picture_data};
-    // TODO: This needs a check to see if it_end + 2 is a valid address
-    std::advance(it_begin, (is_double_byte)? 2 : 1);
+    if (it_after_desc == frame_data.end()) return {mime, picture, desc, picture_data};
 
     it_end = frame_data.end();
-    picture_data = std::vector<uint8_t>(it_begin, it_end);
+    picture_data = std::vector<uint8_t>(it_after_desc, it_end);
 
     return {mime, picture, desc, picture_data};
 }

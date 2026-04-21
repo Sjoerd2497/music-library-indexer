@@ -99,4 +99,4 @@ under MIT License.
 ### Wishlist
 `[x]` Decouple the ID3 parsing logic from the AIFF reader.  
 `[ ]` Add support for other music files that can contain ID3  
-`[ ]` Add support for `UTF-16(BE)` text encoding
+`[x]` Add support for `UTF-16(BE)` text encoding
