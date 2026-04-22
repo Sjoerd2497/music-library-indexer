@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME} main.cpp
         include/util/json.hpp
         include/library_scanner.h
         src/library_scanner.cpp
+        include/options.h
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)

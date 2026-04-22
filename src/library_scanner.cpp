@@ -16,8 +16,8 @@
 //
 // Arguments:
 // - directory_path: The path to the directory to scan for music files.
-// - sub_directories: A bool whether to also include subdirectories, default = true.
-nlohmann::json libraryToJson(const std::string& directory_path, const bool sub_directories) {
+// - options: A struct with options for running the command. For default see include/options.h
+nlohmann::json libraryToJson(const std::string& directory_path, const IndexOptions& options) {
     // TODO: Verify directory_path (but it is unnecessary if user only calls from inside a directory)
 
     // Create a path:
@@ -30,6 +30,9 @@ nlohmann::json libraryToJson(const std::string& directory_path, const bool sub_d
     // Lambda function for scanning the directories (recursive or not):
     auto scan = [&](const auto& iterator) {
         for (auto const& dir_entry : iterator) {
+            if (dir_entry.is_directory()) {
+                std::cout << "Scanning files in: " << dir_entry.path() << "\n";
+            }
             // AIFF files
             if (dir_entry.path().extension() == ".aiff" || dir_entry.path().extension() == ".aif") {
                 std::ifstream fin{ dir_entry.path(), std::ios_base::binary }; // Create an if-stream to open the file.
@@ -50,7 +53,7 @@ nlohmann::json libraryToJson(const std::string& directory_path, const bool sub_d
         }
     };
 
-    if (sub_directories) { // Recursive scanning
+    if (options.subdirectories) { // Recursive scanning
         const std::filesystem::recursive_directory_iterator iterator{path};
         scan(iterator);
     } else { // Non-recursive scanning

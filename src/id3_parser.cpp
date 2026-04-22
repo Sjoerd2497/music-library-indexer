@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include "id3_parser.h"
+#include "options.h"
 #include "util/base64.h"
 #include "util/helpers.h"
 #include "util/json.hpp"
@@ -14,32 +15,32 @@
 // Append the ID3 tag to the JSON as item it.
 //
 // Arguments:
-// - fin: Reference to the ifstream at the start of the ID3 tag.
-// - verbose: Optional bool to enable console output, default false.
-nlohmann::json id3ToJson(std::ifstream& fin, const bool verbose) {
+// - fin:       Reference to the ifstream at the start of the ID3 tag.
+// - options:   A struct with options for running the command. For default see include/options.h
+nlohmann::json id3ToJson(std::ifstream& fin, const IndexOptions& options) {
     nlohmann::json song;
     // Extract ID3 header.
     const ID3Header id3_header = parseId3Header(fin);
     // Extract ID3 frames and add to JSON.
-    extractId3Frames(fin, fromSynchsafe32(id3_header.size), song, verbose);
+    extractId3Frames(fin, fromSynchsafe32(id3_header.size), song, options);
     return song;
 }
 
 // Accepts an fstream at the start of an ID3 tag and parses the header(s).
 //
 // Arguments:
-// - fin: Reference to the ifstream at the start of the ID3 tag.
-// - verbose: Optional bool to enable console output, default = false.
-ID3Header parseId3Header(std::ifstream& fin, const bool verbose) {
+// - fin:       Reference to the ifstream at the start of the ID3 tag.
+// - verbose:   Optional bool to enable console output, default = false.
+ID3Header parseId3Header(std::ifstream& fin, const IndexOptions& options) {
     ID3Header id3_tag_header{};
     fin.read(reinterpret_cast<char*>(&id3_tag_header), sizeof(id3_tag_header));
-    if (verbose) {
+    if (options.verbose) {
         std::cout << "=== ID3 Tag Header ===" << "\n";
         std::cout << "file_identifier: " << charsToStr(id3_tag_header.file_identifier) << "\n";
         std::cout << "version: " << static_cast<int>(id3_tag_header.version[0]) << "." << static_cast<int>(id3_tag_header.version[1]) << "\n";
     }
     const std::bitset<8> flags{id3_tag_header.flags};
-    if (verbose){
+    if (options.verbose){
         std::cout << "flags: " << flags << "\n";
         std::cout << "size: " << fromSynchsafe32(id3_tag_header.size) << "\n";
     }
@@ -59,11 +60,11 @@ ID3Header parseId3Header(std::ifstream& fin, const bool verbose) {
 // Accepts an ifstream at past the ID3 header, scans ID3 frames and writes them to JSON.
 //
 // Arguments:
-// - fin: Reference to the ifstream at the start of the first ID3 frame.
-// - id3_size: The size of the ID3 tag, including the header.
-// - song: The JSON to store the song's ID3 data in.
-// - verbose: Optional bool to enable console output, default = false.
-void extractId3Frames(std::ifstream& fin, const uint32_t id3_size, nlohmann::json& song, const bool verbose) {
+// - fin:       Reference to the ifstream at the start of the first ID3 frame.
+// - id3_size:  The size of the ID3 tag, including the header.
+// - song:      The JSON to store the song's ID3 data in.
+// - verbose:   Optional bool to enable console output, default = false.
+void extractId3Frames(std::ifstream& fin, const uint32_t id3_size, nlohmann::json& song, const IndexOptions& options) {
     const int curr = fin.tellg(); // Current pos on the ifstream, just past the ID3 header
 
     // For every frame:
@@ -76,7 +77,7 @@ void extractId3Frames(std::ifstream& fin, const uint32_t id3_size, nlohmann::jso
         // Exit when reaching padding bytes ( \0 = 00000000 )
         if (id3_frame_header.frame_id[0] == '\0') break;
 
-        if (verbose) {
+        if (options.verbose) {
             std::cout << "frame: " << charsToStr(id3_frame_header.frame_id);
             std::cout << ", size: " << fromSynchsafe32(id3_frame_header.size) << "\n";
         }
@@ -93,11 +94,11 @@ void extractId3Frames(std::ifstream& fin, const uint32_t id3_size, nlohmann::jso
 }
 
 // Create an ID3 frame struct for the supported ID3 frames.
-std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uint8_t>& data) {
+std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uint8_t>& data, const IndexOptions& options) {
     const std::string id = header.frameIdToStr();
     if (id == "TXXX") return std::make_unique<TXXX>(header, data);
     if (id == "COMM") return std::make_unique<COMM>(header, data);
-    if (id == "APIC") return std::make_unique<APIC>(header, data);
+    if (id == "APIC" && options.include_apic) return std::make_unique<APIC>(header, data);
     if (id[0] == 'T') return std::make_unique<TextInformationFrame>(header, data);
     return nullptr;
 }
