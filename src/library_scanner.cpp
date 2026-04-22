@@ -25,6 +25,8 @@ nlohmann::json libraryToJson(const std::string& directory_path, const bool sub_d
 
     nlohmann::json library = nlohmann::json::array();
 
+    std::cout << "Scanning files in: " << directory_path << "\n";
+
     // Lambda function for scanning the directories (recursive or not):
     auto scan = [&](const auto& iterator) {
         for (auto const& dir_entry : iterator) {

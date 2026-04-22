@@ -83,7 +83,7 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
     std::string result;
     // TODO: Edge case - Uneven number of bytes.
 
-    for (Iterator it = begin; it != end; ++++it) {
+    for (Iterator it = begin; it != end; std::advance(it, 2)) {
         // TODO: Edge case - std::next(it) does not exist. (Same as Edge case - Uneven number of bytes?)
         // 1. Construct the 16 bit (2 byte pair) number first, keeping endianness into account:
         const uint16_t byte_pair = (little_endian)
@@ -118,15 +118,15 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
             // 0000001111111111
             // 00000000000000000000001111111111
             // 00000000000000111111111100000000
-            codepoint = (w1_ << 10) | w2_ + 0x10000;
+            codepoint = ((w1_ << 10) | w2_) + 0x10000;
 
             // We already consumed the next byte pair, so advance iterator by 2 extra:
-            ++++it;
+            std::advance(it, 2);
         }
         else if (byte_pair < 0xDFFF) {
             // TODO: Edge case - Low surrogate appears first
         }
-        else if (byte_pair < 0xFFFF) {
+        else if (byte_pair <= 0xFFFF) {
             // 0xE000 to 0xFFFF
             codepoint = byte_pair;       // Byte pair maps directly to codepoint
         }

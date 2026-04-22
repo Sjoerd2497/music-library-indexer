@@ -1,7 +1,7 @@
-# Music library indexer
+# [WIP] Music library indexer
 A CLI app that reads all AIFF files in the current (and sub-)
 directories, and extracts their ID3 tags. 
-Still a work-in-progress.  
+Still a **work-in-progress**.  
 
 ## 1. Getting started
 In `/music` you will find the example file `sample_break.aiff`,
@@ -80,20 +80,20 @@ under MIT License.
 
 ## 5. Milestones  
 ### For the MVP
-`[x]` Read FORM chunk  
-`[x]` Read all chunk headers (ID + size)  
-`[x]` Read ID3 tag header  
-`[x]` Scan ID3 frames  
-`[x]` Read ID3 frames  
-`[x]` Write a Base64 encoder  
-`[x]` (Optional) Write a Base64 decoder  
-`[x]` Parse ID3 frames  
-`[x]` Append ID3 frames to JSON      
-`[x]` Iterate through all files in directory to extract tags  
-`[x]` Iterate through all subfolders to extract all tags   
-`[ ]` Accept input arguments (`mli index`, `mli index -verbose`)  
+`[x]` Read FORM chunk + all chunk headers (ID + size).  
+`[x]` Read ID3 tag header.  
+`[x]` Scan and read ID3 frames.  
+`[x]` Write a Base64 encoder.  
+`[x]` (Optional) write a Base64 decoder.  
+`[x]` Parse ID3 frames.  
+`[x]` Append ID3 frames to JSON.      
+`[x]` Iterate through all files in directory to extract tags.  
+`[x]` Iterate through all subfolders to extract all tags.   
+`[ ]` Accept input arguments (`mli index`, `mli index --verbose`).  
+`[ ]` Write the JSON to a file.  
 
 ### Wishlist
 `[x]` Decouple the ID3 parsing logic from the AIFF reader.  
-`[ ]` Add support for other music files that can contain ID3  
-`[x]` Add support for `UTF-16(BE)` text encoding
+`[ ]` Add support for ALL ID3 frames.  
+`[ ]` Add support for other music files that can contain ID3.  
+`[x]` Add support for `UTF-16(BE)` text encoding.
