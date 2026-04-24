@@ -14,6 +14,8 @@ add_executable(${PROJECT_NAME} main.cpp
         include/library_scanner.h
         src/library_scanner.cpp
         include/options.h
+        src/commands.cpp
+        include/commands.h
 )
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)

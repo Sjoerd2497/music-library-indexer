@@ -18,7 +18,7 @@
 // - directory_path: The path to the directory to scan for music files.
 // - options: A struct with options for running the command. For default see include/options.h
 nlohmann::json libraryToJson(const std::string& directory_path, const IndexOptions& options) {
-    // TODO: Verify directory_path (but it is unnecessary if user only calls from inside a directory)
+    // TODO: Verify directory_path after adding user input of directory_path
 
     // Create a path:
     const auto path = std::filesystem::path(directory_path);

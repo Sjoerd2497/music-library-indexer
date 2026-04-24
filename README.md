@@ -4,10 +4,17 @@ A CLI app that reads all AIFF files in the current directory
 
 ## 1. Getting started
 In `/music` you will find the some example `.aiff` files that
-all have tags.
+all have tags.  
 
 Running this program will scan through the directories in
 `/music` and extract the ID3 tags.
+
+### Building the app
+Build as 'Release' (`CMAKE_BUILD_TYPE=release`) to ensure that
+it uses the correct default path when running the `index` command.
+The 'Debug' build type uses the path to the project folder as
+default directory, while 'Release' uses the current working
+directory.
 
 ## 2. Features
 * Supported music files
