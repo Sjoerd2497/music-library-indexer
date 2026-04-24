@@ -23,5 +23,6 @@ add_executable(${PROJECT_NAME} main.cpp
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     PROJECT_ROOT="${CMAKE_SOURCE_DIR}"
+    $<$<CONFIG:Debug>:DEBUG>
 )
 target_include_directories(${PROJECT_NAME} PRIVATE include)

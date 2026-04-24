@@ -36,14 +36,14 @@
 int main(const int argc, char *argv[]) {
     program::init(argc, argv);
 
-    #ifdef NDEBUG
-        /* BUILD */
-        /* Use this directory_path when building the project for release: */
-        std::filesystem::path directory_path = std::filesystem::current_path();
-    #else
+    #ifdef DEBUG
         /* DEVELOP */
         /* Use this directory_path when running app from the project: */
         std::filesystem::path directory_path = std::filesystem::path(PROJECT_ROOT) / "music";
+    #else
+        /* RELEASE BUILD */
+        /* Use this directory_path when building the project for release: */
+        std::filesystem::path directory_path = std::filesystem::current_path();
     #endif
 
     // Parsing input arguments
