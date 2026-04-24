@@ -5,7 +5,6 @@
 #ifndef MLI_BASE64_H
 #define MLI_BASE64_H
 #include <array>
-#include <iostream>
 #include <string>
 #include <vector>
 #include <cstring>
@@ -37,7 +36,7 @@ inline std::string base64Encode(std::vector<uint8_t> const& data, const bool url
     std::string result;
     const std::array<char, 64>& alphabet = url ? base64URL : base64; // Reference the array to avoid making copies.
     const char& pad = padding;
-    int i;
+    std::size_t i;
     // Loop through data in sets of 3. If data.size() % 3 != 0, we do the last bytes after the loop.
     for (i = 0; i + 3 <= data.size(); i += 3) {
         // Construct four 6 bit integers (a,b,c,d) with the data from 3 characters:
@@ -68,8 +67,8 @@ inline std::string base64Encode(std::vector<uint8_t> const& data, const bool url
     if ( data.size() % 3 == 2 ) {
         // 1 byte of padding needed for the last 2 bytes.
         const uint8_t a = (data[i] & 0b11111100) >> 2;
-        const uint8_t b = ((data[i] & 0b00000011) << 4) | ((data[i+1] & 0b11110000) >> 4);
-        const uint8_t c = ((data[i+1] & 0b00001111 ) << 2);
+        const uint8_t b = (data[i] & 0b00000011) << 4 | (data[i+1] & 0b11110000) >> 4;
+        const uint8_t c = (data[i+1] & 0b00001111 ) << 2;
         result += alphabet[a];
         result += alphabet[b];
         result += alphabet[c];
@@ -78,14 +77,14 @@ inline std::string base64Encode(std::vector<uint8_t> const& data, const bool url
     else if ( data.size() % 3 == 1 ) {
         // 2 bytes of padding needed for the last byte.
         const uint8_t a = (data[i] & 0b11111100) >> 2;
-        const uint8_t b = ((data[i] & 0b00000011) << 4);
+        const uint8_t b = (data[i] & 0b00000011) << 4;
         result += alphabet[a];
         result += alphabet[b];
         result += pad;
         result += pad;
     }
     return result;
-};
+}
 
 // Find the first index of a character in an array.
 template <size_t N>
@@ -98,7 +97,7 @@ inline std::vector<uint8_t> base64Decode(std::string const& data, const bool url
     std::vector<uint8_t> result;
     std::array<char, 64> &alphabet = url ? base64URL : base64;
     const char& pad = padding;
-    for (int i = 0; i + 4 <= data.size(); i += 4) {
+    for (size_t i = 0; i + 4 <= data.size(); i += 4) {
         const uint8_t a = indexOfChar(data[i], alphabet);
         const uint8_t b = indexOfChar(data[i+1], alphabet);
         const uint8_t c = indexOfChar(data[i+2], alphabet);
