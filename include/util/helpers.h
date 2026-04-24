@@ -119,9 +119,6 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
             }
             const uint16_t w1_ = w1 - 0xD800;
             const uint16_t w2_ = w2 - 0xDC00;
-            // 0000001111111111
-            // 00000000000000000000001111111111
-            // 00000000000000111111111100000000
             codepoint = ((w1_ << 10) | w2_) + 0x10000;
 
             // We already consumed the next byte pair, so advance iterator by 2 extra:
@@ -129,6 +126,7 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
         }
         else if (byte_pair < 0xDFFF) {
             // TODO: Edge case - Low surrogate appears first
+            // std::cerr << "Corrupted UTF-16 tag in FILENAME. Invalid surrogate order.";
         }
         else if (byte_pair <= 0xFFFF) {
             // 0xE000 to 0xFFFF

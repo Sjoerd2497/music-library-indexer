@@ -1,7 +1,6 @@
-# [WIP] Music library indexer
-A CLI app that reads all AIFF files in the current (and sub-)
-directories, and extracts their ID3 tags. 
-Still a **work-in-progress**.  
+# Music library indexer
+A CLI app that reads all AIFF files in the current directory 
+(and subdirectories) and extracts their ID3 tags.
 
 ## 1. Getting started
 In `/music` you will find the some example `.aiff` files that
