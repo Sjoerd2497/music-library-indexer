@@ -9,7 +9,9 @@
 #include "options.h"
 
 
-void mliIndex(const std::filesystem::path& directory_path, const IndexOptions& options);
-void mliHelp();
+namespace commands {
+    void index(const std::filesystem::path& directory_path, const IndexOptions& options);
+    void help();
+}
 
 #endif //MLI_COMMANDS_H

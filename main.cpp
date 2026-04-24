@@ -1,5 +1,5 @@
 /**
- *  Music Library Indexer (mli)
+ *  Music Library Indexer
  *  @author Sjoerd de Jonge
  *  2026-03-28
  *
@@ -18,11 +18,13 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <format>
 #include "aiff_reader.h"
 #include "commands.h"
 #include "id3_parser.h"
 #include "nlohmann/json.hpp"
 #include "options.h"
+#include "program_info.h"
 
 // TODO: Add arg '-a' for APIC
 // TODO: Add arg '<PATH>' for changing target directory (and verify input)
@@ -35,7 +37,9 @@
 //      TODO: Add UTF-16 surrogate characters to tags of example songs in /music
 //      TODO: Add corrupted tags to example songs in /music
 
+// argc is always at least 1
 int main(const int argc, char *argv[]) {
+    program::init(argc, argv);
 
     #ifdef NDEBUG
         /* BUILD */
@@ -44,31 +48,56 @@ int main(const int argc, char *argv[]) {
     #else
         /* DEVELOP */
         /* Use this directory_path when running app from the project: */
-        const std::string project_root = PROJECT_ROOT;
-        const std::filesystem::path directory_path = project_root + "/music";
+        const std::filesystem::path directory_path = std::string(PROJECT_ROOT) / "music";
     #endif
 
+    // Parsing input arguments
     if (argc > 1) {
+        // Parse the command to run
+        int cmd = 0;
         if (strcmp(argv[1], "index") == 0) {
-            const IndexOptions options = {
-                .verbose = false,
-                .subdirectories = true,
-                .include_apic = false,
-                .output_type = Output::FILE,
-            };
-            mliIndex(directory_path, options);
+            // Index command
+            cmd = 1;
         }
         else if (strcmp(argv[1], "help") == 0) {
-            mliHelp();
+            // Help command
+            cmd = 2;
         }
         else {
             // Unknown command
-            std::cerr << "mli: '" << argv[1] << "' is not a valid mli command. See 'mli help'.\n";
+            std::cerr << std::format("{}: '{}' is not a valid {} command. See '{} help'.\n",
+                    program::name(), argv[1], program::name(), program::name());
             return 1;
         }
+
+        // Run the command
+        switch (cmd) {
+            case 1: {
+                const IndexOptions options = {
+                    .verbose = false,
+                    .subdirectories = true,
+                    .include_apic = false,
+                    .output_type = Output::FILE,
+                };
+                commands::index(directory_path, options);
+                break;
+            }
+            case 2: {
+                commands::help();
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
     } else {
-        mliHelp();
+        commands::help();
     }
 
     return 0;
+}
+
+void parseArgs(int argc, char *argv[]) {
+    //
 }

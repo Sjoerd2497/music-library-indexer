@@ -7,7 +7,7 @@ In `/music` you will find the some example `.aiff` files that
 all have tags.  
 
 Running this program will scan through the directories in
-`/music` and extract the ID3 tags.
+`/music` and extract the ID3 tags. 
 
 ### Building the app
 Build as 'Release' (`CMAKE_BUILD_TYPE=release`) to ensure that

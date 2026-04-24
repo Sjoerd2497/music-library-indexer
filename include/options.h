@@ -5,8 +5,10 @@
 #ifndef MLI_CONFIG_H
 #define MLI_CONFIG_H
 #include <iostream>
-#include <sstream>
+#include <format>
 #include <chrono>
+
+#include "program_info.h"
 
 enum class Output {
     CONSOLE,
@@ -31,7 +33,7 @@ struct IndexOptions {
 
 private:
      static std::string createFilename() {
-         const std::string suffix = "mli_snapshot.json";
+         const std::string suffix = std::format("{}_snapshot.json", program::name());
          std::chrono::sys_time<std::chrono::nanoseconds> now = std::chrono::system_clock::now();
          return std::format("{:%Y%m%d}_{}", now, suffix);
     }

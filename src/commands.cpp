@@ -11,6 +11,7 @@
 #include "library_scanner.h"
 #include "nlohmann/json.hpp"
 #include "util/helpers.h"
+#include "program_info.h"
 
 // Scan the directory for compatible files, extract ID3 tags for each file, then append to JSON.
 // The JSON is either printed to console, written as file, or discarded.
@@ -18,7 +19,7 @@
 // Arguments:
 // directory_path       Path to the directory to scan.
 // options              IndexOptions to configure options for this command, see include/options.h
-void mliIndex(const std::filesystem::path& directory_path, const IndexOptions& options) {
+void commands::index(const std::filesystem::path& directory_path, const IndexOptions& options) {
     // Directory scanning:
     const nlohmann::json library = libraryToJson(directory_path, options);
 
@@ -42,11 +43,12 @@ void mliIndex(const std::filesystem::path& directory_path, const IndexOptions& o
     }
 }
 
-void mliHelp() {
+// Print help text for instructions on how to use this program.
+void commands::help() {
                 //  ================================================================================
     std::cout   << "Music Library Indexer\n"
-                   "\n"
-                   "  usage: mli <command> [<args>]\n"
+                << "\n"
+                << std::format("  usage: {} <command> [<args>]\n", program::name())
                 << "\n"
                 << "Supported commands:\n"
                 << "index       Runs the Music Library Indexer in the current directory. Scans all\n"
@@ -55,10 +57,10 @@ void mliHelp() {
                 << "            args:\n"
                 << "            [<path>]    Full path to a directory to scan\n"
                 << "            [-a]        Include APIC (attached picture) frame in JSON, with \n"
-                   "                        base64 encoding\n"
+                << "                        base64 encoding\n"
                 << "            [-v]        Verbose console output\n"
                 << "            [--shallow] Single directory only (no subdirectories)\n"
-                   "\n"
-                   "help        Prints this text.\n"
+                << "\n"
+                << "help        Prints this text.\n"
     ;           //  ================================================================================
 }
