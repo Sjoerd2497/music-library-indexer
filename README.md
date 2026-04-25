@@ -121,31 +121,40 @@ Configurations...` and add `index` to the 'Program Arguments' field.
 The output will be a `JSON` array, grouping the tags of one song. The
 ID3 frame id will be used as key. Here is an example of the output:
 ```json
-[
+{
+  "meta": {
+    "directory": "/Users/username/Music",
+    "exported_at": "2026-04-25T15:15:02Z",
+    "file_count": 2,
+    "tool": "mli",
+    "version": "1.0.0"
+  },
+  "songs": [
     {
-        "COMM": {
-            "": "This is a comment!"
-        },
-        "TALB": "Moon Safari",
-        "TCON": "Electronic",
-        "TDRC": "1998",
-        "TIT2": "La Femme D'argent",
-        "TPE1": "Air",
-        "TRCK": "1"
+      "COMM": {
+        "": "This is a comment!"
+      },
+      "TALB": "Moon Safari",
+      "TCON": "Electronic",
+      "TDRC": "1998",
+      "TIT2": "La Femme D'argent",
+      "TPE1": "Air",
+      "TRCK": "1"
     },
     {
-        "COMM": {
-            "": "A remix of the previous track"
-        },
-        "TALB": "Blue Moon Safari",
-        "TCON": "Electronic",
-        "TDRC": "2025",
-        "TIT2": "La Femme D'argent (Vegyn Remix)",
-        "TPE1": "Air",
-        "TPE4": "Vegyn",
-        "TRCK": "6"
+      "COMM": {
+        "": "A remix of the previous track"
+      },
+      "TALB": "Blue Moon Safari",
+      "TCON": "Electronic",
+      "TDRC": "2025",
+      "TIT2": "La Femme D'argent (Vegyn Remix)",
+      "TPE1": "Air",
+      "TPE4": "Vegyn",
+      "TRCK": "6"
     }
-]
+  ]
+}
 ```
 
 ## 4. Features
