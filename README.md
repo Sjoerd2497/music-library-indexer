@@ -35,14 +35,15 @@ Other goals are:
 
 ## 2. Installation
 Choose any of the following options, depending on intended usage:
-* **Add to PATH**. This allows you to run this app from anywhere
+
+* **(a) Add to PATH**. This allows you to run this app from anywhere
   inside your terminal through `mli <command> [<args>]`.
-* **Fork/clone the repo**. If you wish to alter the source code,
+* **(b) Fork/clone the repo**. If you wish to alter the source code,
   or build it yourself, you can fork or clone this repo.
-* **Building the app**. Instead of downloading the binary from here,
+* **(c) Building the app**. Instead of downloading the binary from here,
   you can build it yourself.
 
-### Add to PATH
+### (a) Add to PATH
 Download the binary from the lastest release on this page (`CMD/CTRL +
  F` "Releases") and add to any folder within your PATH.
 
@@ -53,13 +54,13 @@ sudo cp ~/Downloads/mli /usr/local/bin/mli
 ```
 Or copy-paste it with Finder.
 
-### Forking/cloning
+### (b) Forking/cloning
 Navigate to your project folder in the terminal and run:
 ```commandline
 git clone https://github.com/sjoerddejonge/music-library-indexer.git
 ```
 
-### Building the app
+### (c) Building the app
 Build as 'Release' (`-DCMAKE_BUILD_TYPE=Release`) to ensure that
 it uses the correct default path when running the `index` command.
 The 'Debug' build type uses the path to the project folder as
@@ -97,7 +98,44 @@ folder. Keep in mind that you have to provide the input argument
 To do so in CLion, go to `Run > Edit 
 Configurations...` and add `index` to the 'Program Arguments' field.
 
+### Output
+The output will be a `JSON` array, grouping the tags of one song. The
+ID3 frame id will be used as key. Here is an example of the output:
+```json
+[
+    {
+        "COMM": {
+            "": "This is a comment!"
+        },
+        "TALB": "Moon Safari",
+        "TCON": "Electronic",
+        "TDRC": "1998",
+        "TIT2": "La Femme D'argent",
+        "TPE1": "Air",
+        "TRCK": "1"
+    },
+    {
+        "COMM": {
+            "": "A remix of the previous track"
+        },
+        "TALB": "Blue Moon Safari",
+        "TCON": "Electronic",
+        "TDRC": "2025",
+        "TIT2": "La Femme D'argent (Vegyn Remix)",
+        "TPE1": "Air",
+        "TPE4": "Vegyn",
+        "TRCK": "6"
+    }
+]
+```
+
 ## 4. Features
+This app supports reading both `id3v2.3.0` and `id3v2.4.0` tags. It 
+also has an option to include the album cover in the `JSON`. Because a
+`JSON` can only contain text, I wrote a 
+[Base64 encoder](https://en.wikipedia.org/wiki/Base64). This encodes 
+the binary pixel data to a string of 64 possible text characters. 
+
 ### Supported music file formats
 * `.aiff`
 
