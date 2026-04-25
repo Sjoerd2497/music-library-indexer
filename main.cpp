@@ -25,7 +25,8 @@
 #include "options.hpp"
 #include "program_info.hpp"
 
-// TODO: Fix to-dos in UTF-16 converter for edge cases
+// TODO: Include current filename for --verbose
+// TODO: Test UTF-16 edge cases?
 // TODO: Tests:
 //      TODO: Add UTF-16 surrogate characters to tags of example songs in /music
 //      TODO: Add corrupted tags to example songs in /music for testing

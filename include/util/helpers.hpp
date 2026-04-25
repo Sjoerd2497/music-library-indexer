@@ -62,10 +62,10 @@ inline float fromBigEndianFloat(const float value) {
 }
 
 // Find terminating double byte $00 00 in a vector of bytes.
-template <std::input_iterator Iterator>
+template <std::random_access_iterator Iterator>
 Iterator findTerminatingIterator(Iterator begin, Iterator end) {
     Iterator it = begin;
-    while (it != end) {
+    while (it < end) {
         auto next = std::next(it, 1);
         if (next == end) break;
         if (*it == 0x00 && *next == 0x00) return it;
@@ -75,10 +75,10 @@ Iterator findTerminatingIterator(Iterator begin, Iterator end) {
     return end;
 }
 
-template <std::input_iterator Iterator>
+template <std::random_access_iterator Iterator>
 std::string iso88591ToUtf8(Iterator begin, Iterator end) {
     std::string result;
-    for (Iterator it = begin; it != end; ++it) {
+    for (Iterator it = begin; it < end; ++it) {
         if (*it < 0b10000000) {
             result.push_back(static_cast<char> (*it));
         } else {
@@ -89,13 +89,42 @@ std::string iso88591ToUtf8(Iterator begin, Iterator end) {
     return result;
 }
 
-template <std::input_iterator Iterator>
+// Helper struct for utf16ToUtf8()
+struct SurrogatePairResult {
+    uint32_t codepoint;
+    bool advance_extra;
+};
+
+// Helper function for utf16ToUtf8(). Returns a struct with the codepoint and a bool whether to advance the
+// iterator extra.
+inline SurrogatePairResult decodeSurrogatePair(const uint16_t w1, const uint16_t w2) {
+    // 0xD800 < High surrogate < 0xDBFF < 0xDC00 < Low surrogate < 0xDFFF
+    if (w2 < 0xDC00 || w2 > 0xDFFF) {
+        // Edge case - Low surrogate is actually a second, high surrogate
+        if (w2 >= 0xD800 && w2 < 0xDC00) {
+            std::cerr << "Error: Corrupted UTF-16 tag found in file. Two consecutive high surrogates.";
+            return {0xFFFD, false}; // Replacement character:
+        }
+        // Edge case - Low surrogate missing
+        std::cerr << "Error: Corrupted UTF-16 tag found in file. Low surrogate missing.";
+        return {0xFFFD, false}; // Replacement character:
+    }
+
+    const uint16_t w1_ = w1 - 0xD800; // Unnecessary, but for readability
+    const uint16_t w2_ = w2 - 0xDC00;
+    const uint32_t codepoint = (((w1_ << 10) | w2_) + 0x10000);
+    return {codepoint, true};
+}
+
+template <std::random_access_iterator Iterator>
 std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
     std::string result;
-    // TODO: Edge case - Uneven number of bytes.
+    // Edge case - Uneven number of bytes.
+    if ((end - begin) % 2 != 0) {
+        std::cerr << "Error: Corrupted UTF-16 tag found in file. Text has an uneven number of bytes! Skipping last byte.\n";
+    }
 
-    for (Iterator it = begin; it != end; std::advance(it, 2)) {
-        // TODO: Edge case - std::next(it) does not exist. (Same as Edge case - Uneven number of bytes?)
+    for (Iterator it = begin; it < end; std::advance(it, 2)) {
         // 1. Construct the 16 bit (2 byte pair) number first, keeping endianness into account:
         const uint16_t byte_pair = (little_endian)
             ? *std::next(it, 1) << 8 | *it      // LE: First byte is low, second is high
@@ -110,30 +139,33 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
         else if (byte_pair < 0xDC00) {
             // 0xD800 to 0xDBFF (0xDC00 to 0xDFFF is low surrogate)
             // ~~~Surrogate shit~~~
-            // TODO: Edge case - No byte pair after current byte pair
 
-            // W1 = 110110yyyyyyyyyy      // 0xD800 + yyyyyyyyyy
-            // W2 = 110111xxxxxxxxxx      // 0xDC00 + xxxxxxxxxx
-            // Construct high surrogate (from current byte pair):
-            const uint16_t w1 = byte_pair;
-            // Construct low surrogate (from next byte pair):
-            const uint16_t w2 = (little_endian)
-                ? *std::next(it, 3) << 8 | *std::next(it, 2)      // LE: First byte is low, second is high
-                : (*std::next(it, 2) << 8) | *std::next(it, 3);   // BE: First byte is high, second is low
-            if (w2 < 0xDC00 || w2 > 0xDFFF) {
-                // TODO: Edge case - Low surrogate missing
-                // TODO: Edge case - Low surrogate is actually a second high surrogate
+            // Edge case - No byte pair after current byte pair
+            if (std::next(it, 3) > end) {
+                std::cerr << "Error: Corrupted UTF-16 tag found in file. Sole high surrogate at end of text!\n";
+
+                codepoint = 0xFFFD; // Replacement character
             }
-            const uint16_t w1_ = w1 - 0xD800;
-            const uint16_t w2_ = w2 - 0xDC00;
-            codepoint = ((w1_ << 10) | w2_) + 0x10000;
-
-            // We already consumed the next byte pair, so advance iterator by 2 extra:
-            std::advance(it, 2);
+            else {
+                // W1 = 110110yyyyyyyyyy      // 0xD800 + yyyyyyyyyy
+                // W2 = 110111xxxxxxxxxx      // 0xDC00 + xxxxxxxxxx
+                // Construct high surrogate (from current byte pair):
+                const uint16_t w1 = byte_pair;
+                // Construct low surrogate (from next byte pair):
+                const uint16_t w2 = (little_endian)
+                    ? *std::next(it, 3) << 8 | *std::next(it, 2)      // LE: First byte is low, second is high
+                    : (*std::next(it, 2) << 8) | *std::next(it, 3);   // BE: First byte is high, second is low
+                SurrogatePairResult surrogate_result = decodeSurrogatePair(w1, w2);
+                codepoint = surrogate_result.codepoint;
+                if (surrogate_result.advance_extra) {
+                    std::advance(it, 2); // Advance iterator by 2 more if next byte_pair is already consumed
+                }
+            }
         }
         else if (byte_pair < 0xDFFF) {
-            // TODO: Edge case - Low surrogate appears first
-            // std::cerr << "Corrupted UTF-16 tag in FILENAME. Invalid surrogate order.";
+            // TODO: Edge case - Low surrogate appears without preceding high surrogate
+            std::cerr << "Error: Corrupted UTF-16 tag found in file. Low surrogate without preceding high surrogate.";
+            codepoint = 0xFFFD; // Replacement character
         }
         else if (byte_pair <= 0xFFFF) {
             // 0xE000 to 0xFFFF
@@ -188,7 +220,7 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
 //      3 for UTF-8
 // - little_endian: A bool used only for UTF-16 to indicate endianness, default = false
 //   as recommended by section 4.3 https://www.rfc-editor.org/rfc/rfc2781.
-template <std::input_iterator Iterator>
+template <std::random_access_iterator Iterator>
 std::string toUtf8(Iterator begin, Iterator end, const int encoding, bool little_endian = false) {
     switch (encoding) {
         case 0:
