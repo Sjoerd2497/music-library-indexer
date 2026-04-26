@@ -10,8 +10,8 @@ working directory, called a snapshot.
 
 Uses the [nlohmann/json](https://github.com/nlohmann/json) library.
 All other files are written by me.
- 
-<video src="docs/mli_terminal_example.mp4" controls></video>
+
+![Example use of mli](docs/mli_terminal_example.gif)  
 
 <!-- TOC -->
 * [Music library indexer](#music-library-indexer)
