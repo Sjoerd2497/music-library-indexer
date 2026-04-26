@@ -64,7 +64,11 @@ nlohmann::json libraryToJson(const std::filesystem::path& directory_path, const 
                     if (options.verbose) {
                         std::cout << "~ Filename: " << dir_entry.path() << "\n";
                     }
-                    const nlohmann::json song = id3ToJson(fin, options);
+                    // Returns a JSON with at highest level "id3_version" and "id3_frames":
+                    nlohmann::json song = id3ToJson(fin, options);
+                    song["filename"] = dir_entry.path().filename().string(); // Add filename to the JSON
+                    // Add relative path (excluding directory_path) to JSON:
+                    song["relative_path"] = dir_entry.path().lexically_relative(directory_path).string();
                     if (!song.is_null()) library["songs"].push_back(song);
                 }
                 catch (const std::exception& e) {

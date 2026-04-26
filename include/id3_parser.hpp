@@ -70,7 +70,7 @@ struct ID3FrameHeader {
 struct ID3Frame {
     ID3FrameHeader header{};
     virtual ~ID3Frame() = default;
-    virtual void toJson(nlohmann::json& song) const = 0;
+    virtual nlohmann::json toJson() const = 0;
 };
 
 //
@@ -85,7 +85,7 @@ struct TextInformationFrame : public ID3Frame {
     // Constructs a TextInformationFrame, throws on error:
     explicit TextInformationFrame(ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data);
     // Append this frame to the JSON:
-    void toJson(nlohmann::json& song) const override;
+    nlohmann::json toJson() const override;
 
 private:
     // (Private) Parse frame data into struct member variable(s).
@@ -100,7 +100,7 @@ struct TXXX : public ID3Frame {
     // Constructs a TXXX, throws on error.
     explicit TXXX(ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data);
     // Append this frame to the JSON.
-    void toJson(nlohmann::json& song) const override;
+    nlohmann::json toJson() const override;
 
 private:
     // (Private) Parse frame data into struct member variable(s).
@@ -116,7 +116,7 @@ struct COMM : public ID3Frame {
     // Constructs a COMM, throws on error:
     explicit COMM(ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data);
     // Append this frame to the JSON.
-    void toJson(nlohmann::json& song) const override;
+    nlohmann::json toJson() const override;
 
 private:
     // (Private) Parse frame data into struct member variable(s).
@@ -133,7 +133,7 @@ struct APIC : public ID3Frame {
     // Constructs an APIC, throws on error.
     explicit APIC(ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data);
     // Append this frame to the JSON.
-    void toJson(nlohmann::json& song) const override;
+    nlohmann::json toJson() const override;
 
 private:
     // (Private) Parse frame data into struct member variable(s).

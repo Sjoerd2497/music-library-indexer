@@ -65,8 +65,8 @@ Choose any of the following options, depending on intended usage:
   you can build it yourself.
 
 ### (a) Add to PATH
-Download the binary from the lastest release on this page (`CMD/CTRL +
- F` "Releases") and add to any folder within your PATH.
+Download the binary from the [lastest release](https://github.com/sjoerddejonge/music-library-indexer/releases)
+on this page and add to any folder within your PATH.
 
 **On macOS**  
 Download the binary, and then copy it to `/usr/local/bin/`:
@@ -132,33 +132,46 @@ The output will be a `JSON`. Here is an example of the output:
   },
   "songs": [
     {
-      "COMM": {
-        "": "This is a comment!"
+      "filename": "la-femme-dargent.aiff",
+      "id3_frames": {
+        "COMM": {
+          "": "This is a comment!"
+        },
+        "TALB": "Moon Safari",
+        "TCON": "Electronic",
+        "TDRC": "1998",
+        "TIT2": "La Femme D'argent",
+        "TPE1": "Air",
+        "TRCK": "1"
       },
-      "TALB": "Moon Safari",
-      "TCON": "Electronic",
-      "TDRC": "1998",
-      "TIT2": "La Femme D'argent",
-      "TPE1": "Air",
-      "TRCK": "1"
+      "id3_version": "2.3.0",
+      "relative_path": "Air/la-femme-dargent.aiff"
     },
     {
-      "COMM": {
-        "": "A remix of the previous track"
+      "filename": "la-femme-dargent (remix).aif",
+      "id3_frames": {
+        "COMM": {
+          "": "A remix of the previous track!"
+        },
+        "TALB": "Blue Moon Safari",
+        "TCON": "Electronic",
+        "TDRC": "2025",
+        "TIT2": "La Femme D'argent (Vegyn Remix)",
+        "TPE1": "Air",
+        "TPE4": "Vegyn",
+        "TRCK": "6"
       },
-      "TALB": "Blue Moon Safari",
-      "TCON": "Electronic",
-      "TDRC": "2025",
-      "TIT2": "La Femme D'argent (Vegyn Remix)",
-      "TPE1": "Air",
-      "TPE4": "Vegyn",
-      "TRCK": "6"
+      "id3_version": "2.4.0",
+      "relative_path": "Vegyn/la-femme-dargent (remix).aif"
     }
   ]
 }
 ```
 The time under `"exported_at"` is always in UTC. The value for `"tool"`
-is always `"mli"`, even if the user has renamed their binary.
+is always `"mli"`, even if the user has renamed their binary. For each 
+song, the `"filename"` excludes any directories but includes the file 
+extension. `"relative_path"` has the path relative to the `"directory"` 
+defined in `"meta"`.
 
 ## 4. Features
 This app supports reading both `id3v2.3.0` and `id3v2.4.0` tags. It 
