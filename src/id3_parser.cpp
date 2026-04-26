@@ -253,7 +253,6 @@ std::tuple<std::string, uint8_t, std::string, std::vector<uint8_t>> APIC::parseA
 
     std::string mime{};
     uint8_t picture = 0;
-    // std::string desc;
     std::vector<uint8_t> picture_data{};
 
     // For UTF-16 the terminating byte is double, except for MIME type which is always ISO-8859-1 encoding
@@ -275,11 +274,6 @@ std::tuple<std::string, uint8_t, std::string, std::vector<uint8_t>> APIC::parseA
     // If there is no more data, end here.
     if (it_begin == frame_data.end()) return {mime, picture, "", picture_data};
 
-    // it_end = (is_double_byte)
-    //     ? findTerminatingIterator(it_begin, frame_data.end())
-    //     : std::find(it_begin, frame_data.end(), 0x00);
-
-    // desc = toUtf8(it_begin, it_end, text_encoding);
     auto [desc, it_after_desc, little_endian] = readFieldToUtf8(it_begin, frame_data.end(), is_double_byte, text_encoding);
 
     // If there is no more data, end here.

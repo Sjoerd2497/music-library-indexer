@@ -163,7 +163,7 @@ std::string utf16ToUtf8(Iterator begin, Iterator end, bool little_endian) {
             }
         }
         else if (byte_pair < 0xDFFF) {
-            // TODO: Edge case - Low surrogate appears without preceding high surrogate
+            // Edge case - Low surrogate appears without preceding high surrogate
             std::cerr << "Error: Corrupted UTF-16 tag found in file. Low surrogate without preceding high surrogate.";
             codepoint = 0xFFFD; // Replacement character
         }
