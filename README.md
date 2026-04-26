@@ -12,7 +12,7 @@ Uses the [nlohmann/json](https://github.com/nlohmann/json) library.
 All other files are written by me.
 
 ![Example use of mli](docs/mli_terminal_example.gif)
-**[↓ Scroll to example output JSON below ↓](#output)**
+**[Scroll to example output JSON below ↓](#output)**
 
 <!-- TOC -->
 * [Music library indexer](#music-library-indexer)
