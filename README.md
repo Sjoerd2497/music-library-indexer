@@ -36,7 +36,7 @@ All other files are written by me.
     * [Console output](#console-output)
   * [6. Milestones](#6-milestones)
     * [For version 1.0.0 (MVP)](#for-version-100-mvp)
-    * [Wishlist](#wishlist)
+    * [To-do](#to-do)
 <!-- TOC -->
 
 ## 1. Design goals
@@ -72,16 +72,16 @@ on this page and add to any folder within your PATH.
 **On macOS**  
 Download the binary for macOS, and then copy it to `/usr/local/bin/`:
 ```commandline
-sudo cp ~/Downloads/mli /usr/local/bin/mli
+sudo cp ~/Downloads/mli-macos-arm64 /usr/local/bin/mli
 ```
-Or copy-paste it with Finder.
+Or copy-paste it with Finder. Be sure to change its name to just `mli`.
 
 **On Windows**  
-Download the `mli.exe` for x86-64 (for ARM you have to build it yourself) 
-and add it to a folder, `C:\Users\username\bin` for example.  
-Then add that folder to your `$PATH`: search for `env` in the Start menu, 
-click "Environment Variables", edit the "Path" variable, and add the 
-folder you copied `mli.exe` to.
+Download the `mli-windows-x86_64.exe` (for ARM you have to build it 
+yourself) and add it to a folder, `C:\Users\username\bin` for example.
+Rename it to `mli.exe`, then add that folder to your `$PATH`: search 
+for `env` in the Start menu, click "Environment Variables", edit the 
+"Path" variable, and add the folder you copied `mli.exe` to.
 
 ### (b) Forking/cloning
 Navigate to your project folder in the terminal and run:
