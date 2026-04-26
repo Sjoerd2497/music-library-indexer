@@ -11,7 +11,8 @@ working directory, called a snapshot.
 Uses the [nlohmann/json](https://github.com/nlohmann/json) library.
 All other files are written by me.
 
-![Example use of mli](docs/mli_terminal_example.gif)  
+![Example use of mli](docs/mli_terminal_example.gif)
+**[↓ Scroll to example output JSON below ↓]((#output))**
 
 <!-- TOC -->
 * [Music library indexer](#music-library-indexer)
@@ -62,18 +63,25 @@ Choose any of the following options, depending on intended usage:
 * **(b) Fork/clone the repo**. If you wish to alter the source code,
   or build it yourself, you can fork or clone this repo.
 * **(c) Building the app**. Instead of downloading the binary from here,
-  you can build it yourself.
+  you can build it yourself and then add it to your PATH.
 
 ### (a) Add to PATH
 Download the binary from the [lastest release](https://github.com/sjoerddejonge/music-library-indexer/releases)
 on this page and add to any folder within your PATH.
 
 **On macOS**  
-Download the binary, and then copy it to `/usr/local/bin/`:
+Download the binary for macOS, and then copy it to `/usr/local/bin/`:
 ```commandline
 sudo cp ~/Downloads/mli /usr/local/bin/mli
 ```
 Or copy-paste it with Finder.
+
+**On Windows**  
+Download the `mli.exe` for x86-64 (for ARM you have to build it yourself) 
+and add it to a folder, `C:\Users\username\bin` for example.  
+Then add that folder to your `$PATH`: search for `env` in the Start menu, 
+click "Environment Variables", edit the "Path" variable, and add the 
+folder you copied `mli.exe` to.
 
 ### (b) Forking/cloning
 Navigate to your project folder in the terminal and run:
@@ -300,9 +308,9 @@ functionality like help text.
 * `[x]` Iterate through all files in a directory to extract tags
 * `[x]` Accept input arguments (`mli index`, `mli index --verbose`)
 * `[x]` Write the JSON to a file
-* `[ ]` Fix bugs and testing
 
-### Wishlist
+### To-do
+* `[ ]` Testing
 * `[ ]` Improve argument parsing to be more Unix-like
 * `[ ]` Fix code TODOs
 * `[ ]` Add support for **ALL** ID3 frames
