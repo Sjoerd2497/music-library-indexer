@@ -1,0 +1,53 @@
+{
+    "meta": {
+        "directory": "C:/Users/Sjoerd/git/music-library-indexer\\music",
+        "exported_at": "2026-04-26T14:16:05Z",
+        "file_count": 4,
+        "tool": "mli",
+        "version": "1.0.0"
+    },
+    "songs": [
+        {
+            "filename": "01 Breaky beat.aiff",
+            "id3_frames": {
+                "COMM": {
+                    "": "This track was made in Ableton Live"
+                },
+                "TALB": "Sample Album",
+                "TCON": "Breaks",
+                "TDRC": "2026",
+                "TIT2": "Sample Break",
+                "TPE1": "Unknown Artist",
+                "TRCK": "1"
+            },
+            "id3_version": "2.3.0",
+            "relative_path": "01 Breaky beat.aiff"
+        },
+        {
+            "filename": "02 Breakbeat 1.aiff",
+            "id3_version": "2.32.0",
+            "relative_path": "02 Breakbeat 1.aiff"
+        },
+        {
+            "filename": "short song.aif",
+            "id3_version": "2.32.0",
+            "relative_path": "test1\\short song.aif"
+        },
+        {
+            "filename": "song2.aiff",
+            "id3_frames": {
+                "COMM": {
+                    "": "This track was made in Ableton Live"
+                },
+                "TALB": "Sample Album",
+                "TCON": "Breaks",
+                "TDRC": "2026",
+                "TIT2": "Sample Break",
+                "TPE1": "Unknown Artist",
+                "TRCK": "1"
+            },
+            "id3_version": "2.3.0",
+            "relative_path": "test1\\test2\\song2.aiff"
+        }
+    ]
+}

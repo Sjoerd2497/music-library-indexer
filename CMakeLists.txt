@@ -26,6 +26,10 @@ add_executable(${PROJECT_NAME} main.cpp
         src/program_info.cpp
 )
 
+if(WIN32)
+    target_link_options(${PROJECT_NAME} PRIVATE -static-libgcc -static-libstdc++ -static -lpthread)
+endif()
+
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     PROJECT_ROOT="${CMAKE_SOURCE_DIR}"
