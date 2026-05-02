@@ -10,6 +10,7 @@ working directory, called a snapshot.
 
 Uses the [nlohmann/json](https://github.com/nlohmann/json) library.
 All other files are written by me.  
+
 Documentation can be found [here](https://sjoerddejonge.github.io/music-library-indexer/).
 
 ![Example use of mli](docs/mli_terminal_example.gif)  
@@ -239,10 +240,10 @@ Other frames
 ### Adding new file format readers
 Adding support for new music file formats is as easy as creating a 
 separate implementation file, for example: `flac_reader.cpp`. It 
-should have a function that accepts an `std::ifstream&` and reads 
-up until the start of ID3 header:
+should have a function that accepts an `std::ifstream&` and returns 
+the start of ID3 header as `std::streampos`:
 ```c++
-void locateId3(std::ifstream& fin);
+std::optional<std::streampos> locateId3(std::ifstream& fin);
 ```
 
 This function can then be called in the function `libraryToJson()`
@@ -267,9 +268,21 @@ auto scan = [&](const auto& iterator) {
                 continue;
             }
             try {
-                locateId3(fin); // Skip ifstream to the start of the ID3 tag.
-                const nlohmann::json song = id3ToJson(fin, options);
-                if (!song.is_null()) library.push_back(song);
+                std::optional<std::streampos> id3_pos = locateId3(fin); // Skip ifstream to the start of the ID3 tag.
+                if (options.verbose) {
+                    std::cout << "~ Filename: " << dir_entry.path() << "\n";
+                }
+                if (id3_pos == std::nullopt) {
+                    std::cout << "No ID3 tag found in file.\n";
+                }
+                else {
+                    // Returns a JSON with at highest level "id3_version" and "id3_frames":
+                    nlohmann::json song = id3ToJson(fin, id3_pos.value(), options);
+                    song["filename"] = dir_entry.path().filename().string(); // Add filename to the JSON
+                    // Add relative path (excluding directory_path) to JSON:
+                    song["relative_path"] = dir_entry.path().lexically_relative(directory_path).string();
+                    if (!song.is_null()) library["songs"].push_back(song);
+                }
             }
             catch (const std::exception& e) {
                 std::cerr << "Error occurred: " << e.what() << "\n";

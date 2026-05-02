@@ -60,16 +60,21 @@ nlohmann::json libraryToJson(const std::filesystem::path& directory_path, const 
                     continue;
                 }
                 try {
-                    locateId3(fin); // Skip ifstream to the start of the ID3 tag.
+                    std::optional<std::streampos> id3_pos = locateId3(fin); // Skip ifstream to the start of the ID3 tag.
                     if (options.verbose) {
                         std::cout << "~ Filename: " << dir_entry.path() << "\n";
                     }
-                    // Returns a JSON with at highest level "id3_version" and "id3_frames":
-                    nlohmann::json song = id3ToJson(fin, options);
-                    song["filename"] = dir_entry.path().filename().string(); // Add filename to the JSON
-                    // Add relative path (excluding directory_path) to JSON:
-                    song["relative_path"] = dir_entry.path().lexically_relative(directory_path).string();
-                    if (!song.is_null()) library["songs"].push_back(song);
+                    if (id3_pos == std::nullopt) {
+                        std::cout << "No ID3 tag found in file.\n";
+                    }
+                    else {
+                        // Returns a JSON with at highest level "id3_version" and "id3_frames":
+                        nlohmann::json song = id3ToJson(fin, id3_pos.value(), options);
+                        song["filename"] = dir_entry.path().filename().string(); // Add filename to the JSON
+                        // Add relative path (excluding directory_path) to JSON:
+                        song["relative_path"] = dir_entry.path().lexically_relative(directory_path).string();
+                        if (!song.is_null()) library["songs"].push_back(song);
+                    }
                 }
                 catch (const std::exception& e) {
                     std::cerr << "Error occurred: " << e.what() << "\n";

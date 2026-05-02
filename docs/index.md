@@ -190,3 +190,5 @@ $12     Illustration
 $13     Band/artist logotype
 $14     Publisher/Studio logotype
 ```
+
+[← Return to repo](https://github.com/sjoerddejonge/music-library-indexer)

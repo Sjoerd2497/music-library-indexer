@@ -17,8 +17,10 @@
 // Arguments:
 // - fin:       Reference to the ifstream at the start of the ID3 tag.
 // - options:   A struct with options for running the command. For default see include/options.hpp
-nlohmann::json id3ToJson(std::ifstream& fin, const IndexOptions& options) {
+nlohmann::json id3ToJson(std::ifstream& fin, const std::streampos &id3_pos, const IndexOptions& options) {
     nlohmann::json song;
+    // Move to start of ID3 tag
+    fin.seekg(id3_pos);
     // Extract ID3 header.
     const ID3Header id3_header = parseId3Header(fin, options);
     // Extract ID3 frames and add to JSON.

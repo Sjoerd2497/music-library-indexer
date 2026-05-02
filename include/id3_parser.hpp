@@ -189,6 +189,6 @@ std::tuple<std::string, Iterator, std::optional<bool>> readFieldToUtf8(Iterator 
 ID3Header parseId3Header(std::ifstream& fin, const IndexOptions& options);
 void extractId3Frames(std::ifstream& fin, ID3Header id3_header, nlohmann::json& song, const IndexOptions& options);
 std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uint8_t>& data, const IndexOptions& options);
-nlohmann::json id3ToJson(std::ifstream& fin, const IndexOptions& options);
+nlohmann::json id3ToJson(std::ifstream& fin, const std::streampos &id3_pos, const IndexOptions& options);
 
 #endif //MLI_ID3_PARSER_H

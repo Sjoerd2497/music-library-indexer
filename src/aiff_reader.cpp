@@ -17,7 +17,7 @@
 // Arguments:
 // fin: The ifstream of an .aiff file.
 // verbose: (Optional) bool to toggle console output.
-void locateId3(std::ifstream& fin, const bool verbose) {
+std::optional<std::streampos> locateId3(std::ifstream& fin, const bool verbose) {
     if (fin) {
         formChunk form_chunk{};
         fin.read(reinterpret_cast<char*>(&form_chunk), sizeof(form_chunk));
@@ -46,8 +46,9 @@ void locateId3(std::ifstream& fin, const bool verbose) {
 
             if (ckID == "ID3 ") {
                 if (verbose) std::cout << "Found ID3 tag." << "\n";
+                std::streampos id3_pos = fin.tellg();
                 // Terminate function
-                return;
+                return id3_pos;
             }
 
             // Determine how far we skip ahead, which is equal to the size of data in the chunk.
@@ -56,4 +57,5 @@ void locateId3(std::ifstream& fin, const bool verbose) {
             if (verbose) std::cout << "current position: " << fin.tellg() << "\n";
         }
     }
+    return std::nullopt;
 }
