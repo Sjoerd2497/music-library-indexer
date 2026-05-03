@@ -39,6 +39,14 @@ struct commonChunk {
 };
 #pragma pack(pop)
 
-std::optional<std::streampos> locateId3(std::ifstream& fin, bool verbose = false);
+struct aiffData {
+    std::vector<uint8_t> name;
+    std::vector<uint8_t> auth;
+    std::vector<uint8_t> copyright;
+    std::vector<uint8_t> anno;
+    std::optional<std::streampos> id3_pos;
+};
+
+aiffData scanFile(std::ifstream& fin, bool verbose = false);
 
 #endif //MLI_AIFF_READER_H

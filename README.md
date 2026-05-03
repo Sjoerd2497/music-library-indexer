@@ -75,7 +75,7 @@ Download the binary for macOS, and then copy it to `/usr/local/bin/`:
 ```commandline
 sudo cp ~/Downloads/mli-macos-arm64 /usr/local/bin/mli
 ```
-Or copy-paste it with Finder. Be sure to change its name to just `mli`.
+Or copy-paste it with Finder. Be sure to rename the file to just `mli`.
 
 **On Windows**  
 Download the `mli-windows-x86_64.exe` (for ARM you have to build it 
