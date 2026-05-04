@@ -23,27 +23,27 @@ aiffData scanFile(std::ifstream& fin, const bool verbose) {
     if (fin) {
         formChunk form_chunk{};
         fin.read(reinterpret_cast<char*>(&form_chunk), sizeof(form_chunk));
-        form_chunk.ckSize = fromBigEndianInt(form_chunk.ckSize); // Byte swap from big endian to native endian
+        form_chunk.ck_size = fromBigEndianInt(form_chunk.ck_size); // Byte swap from big endian to native endian
 
         if (verbose) {
             std::cout << "=== FORM chunk ===" << "\n";
-            std::cout << "ckID: " << charsToStr(form_chunk.ckID) << "\n";
-            std::cout << "ckSize: " << form_chunk.ckSize << "\n";
-            std::cout << "formType: " << charsToStr(form_chunk.formType) << "\n";
+            std::cout << "ckID: " << charsToStr(form_chunk.ck_id) << "\n";
+            std::cout << "ckSize: " << form_chunk.ck_size << "\n";
+            std::cout << "formType: " << charsToStr(form_chunk.form_type) << "\n";
         }
 
         // Loop through the file, extracting the ckID and ckSize of each chunk
-        while (fin.good() && fin.tellg() < form_chunk.ckSize + 8) {
+        while (fin.good() && fin.tellg() < form_chunk.ck_size + 8) {
             chunkHeader chunk_header{};
             fin.read(reinterpret_cast<char*>(&chunk_header), sizeof(chunk_header));
-            chunk_header.ckSize = fromBigEndianInt(chunk_header.ckSize);
+            chunk_header.ck_size = fromBigEndianInt(chunk_header.ck_size);
 
-            const std::string ckID = charsToStr(chunk_header.ckID);
+            const std::string ckID = charsToStr(chunk_header.ck_id);
 
             if (verbose) {
                 std::cout << std::format("=== {} chunk ===", ckID)  << "\n";
                 std::cout << "ckID: " << ckID << "\n";
-                std::cout << "ckSize: " << chunk_header.ckSize << "\n";
+                std::cout << "ckSize: " << chunk_header.ck_size << "\n";
             }
 
             if (ckID == "ID3 ") {
@@ -52,36 +52,36 @@ aiffData scanFile(std::ifstream& fin, const bool verbose) {
             }
 
             if (ckID == "NAME") {
-                output.name.resize(chunk_header.ckSize); // Resize container
-                fin.read(reinterpret_cast<std::istream::char_type *>(output.name.data()), chunk_header.ckSize);
-                if (chunk_header.ckSize % 2 != 0) fin.seekg(1, std::ios_base::cur);
+                output.name.resize(chunk_header.ck_size); // Resize container
+                fin.read(reinterpret_cast<std::istream::char_type *>(output.name.data()), chunk_header.ck_size);
+                if (chunk_header.ck_size % 2 != 0) fin.seekg(1, std::ios_base::cur);
                 continue;
             }
 
             if (ckID == "AUTH") {
-                output.auth.resize(chunk_header.ckSize); // Resize container
-                fin.read(reinterpret_cast<std::istream::char_type *>(output.auth.data()), chunk_header.ckSize);
-                if (chunk_header.ckSize % 2 != 0) fin.seekg(1, std::ios_base::cur);
+                output.auth.resize(chunk_header.ck_size); // Resize container
+                fin.read(reinterpret_cast<std::istream::char_type *>(output.auth.data()), chunk_header.ck_size);
+                if (chunk_header.ck_size % 2 != 0) fin.seekg(1, std::ios_base::cur);
                 continue;
             }
 
             if (ckID == "(c) ") {
-                output.copyright.resize(chunk_header.ckSize); // Resize container
-                fin.read(reinterpret_cast<std::istream::char_type *>(output.copyright.data()), chunk_header.ckSize);
-                if (chunk_header.ckSize % 2 != 0) fin.seekg(1, std::ios_base::cur);
+                output.copyright.resize(chunk_header.ck_size); // Resize container
+                fin.read(reinterpret_cast<std::istream::char_type *>(output.copyright.data()), chunk_header.ck_size);
+                if (chunk_header.ck_size % 2 != 0) fin.seekg(1, std::ios_base::cur);
                 continue;
             }
 
             if (ckID == "ANNO") {
-                output.anno.resize(chunk_header.ckSize); // Resize container
-                fin.read(reinterpret_cast<std::istream::char_type *>(output.anno.data()), chunk_header.ckSize);
-                if (chunk_header.ckSize % 2 != 0) fin.seekg(1, std::ios_base::cur);
+                output.anno.resize(chunk_header.ck_size); // Resize container
+                fin.read(reinterpret_cast<std::istream::char_type *>(output.anno.data()), chunk_header.ck_size);
+                if (chunk_header.ck_size % 2 != 0) fin.seekg(1, std::ios_base::cur);
                 continue;
             }
 
             // Determine how far we skip ahead, which is equal to the size of data in the chunk.
             // If the ckSize is odd, there is a padding byte at the end not counted in ckSize.
-            const int32_t skip = (chunk_header.ckSize % 2 == 0) ? chunk_header.ckSize : chunk_header.ckSize + 1;
+            const int32_t skip = (chunk_header.ck_size % 2 == 0) ? chunk_header.ck_size : chunk_header.ck_size + 1;
             fin.seekg(skip, std::ios_base::cur);
             if (verbose) std::cout << "current position: " << fin.tellg() << "\n";
         }
