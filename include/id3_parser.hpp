@@ -139,12 +139,15 @@ private:
     static std::tuple<std::string, uint8_t, std::string, std::vector<uint8_t>> parseAPICFrame(const std::vector<uint8_t>& frame_data, uint8_t text_encoding);
 };
 
-// TODO: Add support for URL and USLT frames:
-// // URL link frames, ID: "W000" - "WZZZ", excluding "WXXX".
-// struct URLLinkFrame {
-//     std::string url;
-// };
+// URL link frames, ID: "W000" - "WZZZ", excluding "WXXX".
+struct UrlLinkFrame : public ID3Frame {
+    std::string url;
+    explicit UrlLinkFrame(ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data);
+    // Append this frame to the JSON.
+    [[nodiscard]] nlohmann::json toJson() const override;
+};
 
+// TODO: Add support for USLT frames:
 // // Unsynchronised lyrics/text transcription frames.
 // struct USLT {
 //     uint8_t encoding;
@@ -155,7 +158,7 @@ private:
 
 // Helper functions:
 
-// Reads a field from its start to null terminator or end, returns {field_string, iterator_past_terminator}.
+// Reads a field from its start to null terminator or end, returns {field_string, iterator_past_terminator, bool_little_endian}.
 // The returned field_string is always in UTF-8.
 template <std::input_iterator Iterator>
 std::tuple<std::string, Iterator, std::optional<bool>> readFieldToUtf8(Iterator begin, Iterator end_of_vector, bool double_byte, int encoding, bool little_endian = false) {

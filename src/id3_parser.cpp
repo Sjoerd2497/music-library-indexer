@@ -112,6 +112,7 @@ std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uin
     if (id == "COMM") return std::make_unique<COMM>(header, data);
     if (id == "APIC" && options.include_apic) return std::make_unique<APIC>(header, data);
     if (id[0] == 'T') return std::make_unique<TextInformationFrame>(header, data);
+    if (id[0] == 'W' && id != "WXXX") return std::make_unique<UrlLinkFrame>(header, data);
     return nullptr;
 }
 
@@ -302,4 +303,25 @@ std::tuple<std::string, uint8_t, std::string, std::vector<uint8_t>> APIC::parseA
     picture_data = std::vector<uint8_t>(it_after_desc, it_end);
 
     return {mime, picture, desc, picture_data};
+}
+
+// -------------------------------------
+//          Struct UrlLinkFrame
+// -------------------------------------
+
+UrlLinkFrame::UrlLinkFrame(ID3FrameHeader frame_header, const std::vector<uint8_t> &frame_data) {
+    // Data should never be empty
+    if (frame_data.empty()) throw std::runtime_error("UrlLinkFrame: empty frame");
+
+    header = frame_header;
+    auto [text, iter, opt] = readFieldToUtf8(frame_data.begin(), frame_data.end(), false, 3);
+    url = text;
+}
+
+nlohmann::json UrlLinkFrame::toJson() const {
+    nlohmann::json frame;
+    if (!url.empty()) {
+        frame[header.frameIdToStr()] = url;
+    }
+    return frame;
 }

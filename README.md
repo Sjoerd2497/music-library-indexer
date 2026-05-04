@@ -339,11 +339,14 @@ functionality like help text.
 
 ### To-do
 * `[ ]` Testing UTF-16 tags
+* `[ ]` Evaluate whether empty ID3 frames should throw a runtime error
+* `[ ]` Add sanitation flag to `index` command to strip unicode control
+chars
 * `[ ]` Improve argument parsing to be more Unix-like
 * `[ ]` Fix code TODOs
 * `[ ]` Add support for **ALL** ID3 frames
-* `[ ]` Add `.aiff` text chunks to JSON  
 * `[ ]` Support more music file formats:
   * `[ ]` Add support for `.flac` music files
   * `[ ]` Add support for `.mp3` music files
+* `[x]` Add `.aiff` text chunks to JSON
 * `[x]` Decouple the ID3 parsing logic from the AIFF reader
