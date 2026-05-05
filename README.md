@@ -8,13 +8,78 @@ to find the ID3 tag, and extract all information from the tag.
 The information is added to a `JSON` that is written to the current
 working directory, called a snapshot.
 
+Documentation can be found [here](https://sjoerddejonge.github.io/music-library-indexer/).  
 Uses the [nlohmann/json](https://github.com/nlohmann/json) library.
-All other files are written by me.  
-
-Documentation can be found [here](https://sjoerddejonge.github.io/music-library-indexer/).
+All other files are written by me.
 
 ![Example use of mli](docs/mli_terminal_example.gif)  
-**[↓ Scroll to example output JSON below ↓](#output)**
+
+<details>
+
+<summary>Example of a result</summary>
+
+```json
+{
+  "meta": {
+    "directory": "/Users/username/Music",
+    "exported_at": "2026-04-25T15:15:02Z",
+    "file_count": 2,
+    "tool": "mli",
+    "version": "0.1.0"
+  },
+  "songs": [
+    {
+      "aiff_data": {
+        "annotation": "Annotations in AIFF files are another type of comment",
+        "name": "La Femme D'argent",
+        "comments": [
+          {
+            "marker_id": 0,
+            "text": "This is an AIFF comment"
+          }
+        ]
+      },
+      "filename": "la-femme-dargent.aiff",
+      "id3_frames": {
+        "COMM": {
+          "comment": "This is a comment",
+          "description": "",
+          "language": "eng"
+        },
+        "TALB": "Moon Safari",
+        "TCON": "Electronic",
+        "TDRC": "1998",
+        "TIT2": "La Femme D'argent",
+        "TPE1": "Air",
+        "TRCK": "1"
+      },
+      "id3_version": "2.3.0",
+      "relative_path": "Air/la-femme-dargent.aiff"
+    },
+    {
+      "filename": "la-femme-dargent (remix).aif",
+      "id3_frames": {
+        "COMM": {
+          "comment": "This is track is a remix",
+          "description": "",
+          "language": "eng"
+        },
+        "TALB": "Blue Moon Safari",
+        "TCON": "Electronic",
+        "TDRC": "2025",
+        "TIT2": "La Femme D'argent (Vegyn Remix)",
+        "TPE1": "Air",
+        "TPE4": "Vegyn",
+        "TRCK": "6"
+      },
+      "id3_version": "2.4.0",
+      "relative_path": "Vegyn/la-femme-dargent (remix).aif"
+    }
+  ]
+}
+```
+
+</details>
 
 <!-- TOC -->
 * [Music library indexer](#music-library-indexer)
@@ -222,6 +287,10 @@ Text frames
 [TXXX]              User defined text
 [T...]              All other text frames are also supported
 
+URL link frames
+[WXXX]              User defined URL link frames
+[W...]              All URL link frames are supported
+
 Other frames
 [COMM]              Comments
 [APIC]              Attached picture, will be encoded as text
@@ -338,6 +407,7 @@ functionality like help text.
 * `[x]` Write the JSON to a file
 
 ### To-do
+* `[ ]` Refactor TXXX and WXXX structure in JSON
 * `[ ]` Testing UTF-16 tags
 * `[ ]` Evaluate whether empty ID3 frames should throw a runtime error
 * `[ ]` Add sanitation flag to `index` command to strip unicode control

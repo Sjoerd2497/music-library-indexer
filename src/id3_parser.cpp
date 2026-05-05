@@ -109,10 +109,11 @@ void extractId3Frames(std::ifstream& fin, const ID3Header id3_header, nlohmann::
 std::unique_ptr<ID3Frame> makeFrame(ID3FrameHeader header, const std::vector<uint8_t>& data, const IndexOptions& options) {
     const std::string id = header.frameIdToStr();
     if (id == "TXXX") return std::make_unique<TXXX>(header, data);
+    if (id == "WXXX") return std::make_unique<WXXX>(header, data);
     if (id == "COMM") return std::make_unique<COMM>(header, data);
     if (id == "APIC" && options.include_apic) return std::make_unique<APIC>(header, data);
     if (id[0] == 'T') return std::make_unique<TextInformationFrame>(header, data);
-    if (id[0] == 'W' && id != "WXXX") return std::make_unique<UrlLinkFrame>(header, data);
+    if (id[0] == 'W') return std::make_unique<UrlLinkFrame>(header, data);
     return nullptr;
 }
 
@@ -314,7 +315,7 @@ UrlLinkFrame::UrlLinkFrame(ID3FrameHeader frame_header, const std::vector<uint8_
     if (frame_data.empty()) throw std::runtime_error("UrlLinkFrame: empty frame");
 
     header = frame_header;
-    auto [text, iter, opt] = readFieldToUtf8(frame_data.begin(), frame_data.end(), false, 3);
+    auto [text, iter, opt] = readFieldToUtf8(frame_data.begin(), frame_data.end(), false, 0);
     url = text;
 }
 
@@ -322,6 +323,32 @@ nlohmann::json UrlLinkFrame::toJson() const {
     nlohmann::json frame;
     if (!url.empty()) {
         frame[header.frameIdToStr()] = url;
+    }
+    return frame;
+}
+
+// -------------------------------------
+//              Struct WXXX
+// -------------------------------------
+
+WXXX::WXXX(const ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data) {
+    // Data should never be empty
+    if (frame_data.empty()) throw std::runtime_error("WXXX: empty frame");
+    header = frame_header;
+    encoding = frame_data[0];
+    auto it_begin = frame_data.begin() + 1;
+    bool is_double_byte = (encoding == 1 || encoding == 2);
+    auto [desc, it_after_field, opt] = readFieldToUtf8(it_begin, frame_data.end(), is_double_byte, encoding);
+    description = desc;
+    auto [text, iter, opt2] = readFieldToUtf8(it_after_field, frame_data.end(), false, 0);
+    url = text;
+}
+
+nlohmann::json WXXX::toJson() const {
+    nlohmann::json frame;
+    if (!url.empty()) {
+        frame[header.frameIdToStr()]["description"] = description;
+        frame[header.frameIdToStr()]["url"] = url;
     }
     return frame;
 }

@@ -147,6 +147,15 @@ struct UrlLinkFrame : public ID3Frame {
     [[nodiscard]] nlohmann::json toJson() const override;
 };
 
+struct WXXX : public ID3Frame {
+    uint8_t encoding;
+    std::string description;
+    std::string url;
+
+    explicit WXXX(ID3FrameHeader frame_header, const std::vector<uint8_t>& frame_data);
+    [[nodiscard]] nlohmann::json toJson() const override;
+};
+
 // TODO: Add support for USLT frames:
 // // Unsynchronised lyrics/text transcription frames.
 // struct USLT {
