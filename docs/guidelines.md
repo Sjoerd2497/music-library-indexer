@@ -36,7 +36,7 @@ All commits should have one of the following types:
 * `test`: Add or correct test(s).
 
 
-## Writing code
+## Code comments
 > Public functions in header files should use doxygen-style comments to
 document the functionality.  
 
